@@ -8,11 +8,10 @@ import {
   needToSendApproveMention,
 } from "./modules/github";
 import {
-  buildSlackPostMessage,
-  buildSlackErrorMessage,
-  SlackRepositoryImpl,
-  convertGithubTextToBlockquotesText,
-} from "./modules/slack";
+  buildChatworkErrorMessage,
+  buildChatworkPostMessage,
+  ChatworkRepositoryImpl,
+} from "./modules/chatwork";
 import {
   MappingConfigRepositoryImpl,
   isUrl,
@@ -22,9 +21,7 @@ import {
 export type AllInputs = {
   repoToken: string;
   configurationPath: string;
-  slackWebhookUrl: string;
-  iconUrl?: string;
-  botName?: string;
+  apiToken: string;
   runId?: string;
 };
 
@@ -34,12 +31,11 @@ export const arrayDiff = <T>(arr1: T[], arr2: T[]) =>
 export const convertToSlackUsername = (
   githubUsernames: string[],
   mapping: MappingFile
-): string[] => {
+): [room_id: string, account_id: string][] => {
   core.debug(JSON.stringify({ githubUsernames }, null, 2));
 
   const slackIds = githubUsernames
-    .map((githubUsername) => mapping[githubUsername])
-    .filter((slackId) => slackId !== undefined) as string[];
+    .map((githubUsername) => mapping[githubUsername]);
 
   core.debug(JSON.stringify({ slackIds }, null, 2));
 
@@ -50,7 +46,7 @@ export const execPrReviewRequestedMention = async (
   payload: WebhookPayload,
   allInputs: AllInputs,
   mapping: MappingFile,
-  slackClient: Pick<typeof SlackRepositoryImpl, "postToSlack">
+  chatworkClient: Pick<typeof ChatworkRepositoryImpl, "postToChatwork">
 ): Promise<void> => {
   const requestedGithubUsername =
     payload.requested_reviewer?.login || payload.requested_team?.name;
@@ -70,21 +66,20 @@ export const execPrReviewRequestedMention = async (
 
   const title = payload.pull_request?.title;
   const url = payload.pull_request?.html_url;
-  const requestedSlackUserId = slackIds[0];
+  const [roomId, accountId] = slackIds[0];
   const requestUsername = payload.sender?.login;
 
-  const message = `<@${requestedSlackUserId}> has been requested to review <${url}|${title}> by ${requestUsername}.`;
-  const { slackWebhookUrl, iconUrl, botName } = allInputs;
+  const message = `<@${accountId}> has been requested to review <${url}|${title}> by ${requestUsername}.`;
+  const { apiToken } = allInputs;
 
-  await slackClient.postToSlack(slackWebhookUrl, message, { iconUrl, botName });
+  await chatworkClient.postToChatwork(apiToken, roomId, message);
 };
 
 export const execNormalMention = async (
   payload: WebhookPayload,
   allInputs: AllInputs,
   mapping: MappingFile,
-  slackClient: Pick<typeof SlackRepositoryImpl, "postToSlack">,
-  ignoreSlackIds: string[]
+  chatworkClient: Pick<typeof ChatworkRepositoryImpl, "postToChatwork">
 ): Promise<void> => {
   const info = pickupInfoFromGithubPayload(payload);
 
@@ -100,38 +95,36 @@ export const execNormalMention = async (
   }
 
   const slackIds = convertToSlackUsername(githubUsernames, mapping);
-  const slackIdsWithoutIgnore = arrayDiff(slackIds, ignoreSlackIds);
 
-  if (slackIdsWithoutIgnore.length === 0) {
+  if (slackIds.length === 0) {
     core.debug("finish execNormalMention because slackIds.length === 0");
     return;
   }
 
-  const message = buildSlackPostMessage(
-    slackIdsWithoutIgnore,
-    info.title,
-    info.url,
-    info.body,
-    info.senderName
-  );
+  for (const [roomId, accountId] of slackIds) {
+    const message = buildChatworkPostMessage(
+        [accountId],
+        info.title,
+        info.url,
+        info.body,
+        info.senderName
+    );
 
-  const { slackWebhookUrl, iconUrl, botName } = allInputs;
+    const {apiToken} = allInputs;
 
-  const result = await slackClient.postToSlack(slackWebhookUrl, message, {
-    iconUrl,
-    botName,
-  });
+    const result = await chatworkClient.postToChatwork(apiToken, roomId, message);
 
-  core.debug(
-    ["postToSlack result", JSON.stringify({ result }, null, 2)].join("\n")
-  );
+    core.debug(
+        ["postToSlack result", JSON.stringify({result}, null, 2)].join("\n")
+    );
+  }
 };
 
 export const execApproveMention = async (
   payload: WebhookPayload,
   allInputs: AllInputs,
   mapping: MappingFile,
-  slackClient: Pick<typeof SlackRepositoryImpl, "postToSlack">
+  chatworkClient: Pick<typeof ChatworkRepositoryImpl, "postToChatwork">
 ): Promise<string | null> => {
   if (!needToSendApproveMention(payload)) {
     throw new Error("failed to parse payload");
@@ -151,23 +144,18 @@ export const execApproveMention = async (
   }
 
   const info = pickupInfoFromGithubPayload(payload);
-  const prOwnerSlackUserId = slackIds[0];
+  const [roomId, accountId] = slackIds[0];
   const approveOwner = payload.sender?.login;
-
-  const blockquotesApproveMessage = convertGithubTextToBlockquotesText(
-    info.body || ""
-  );
-
   const message = [
-    `<@${prOwnerSlackUserId}> has been approved <${info.url}|${info.title}> by ${approveOwner}.`,
-    blockquotesApproveMessage,
+    `<@${accountId}> has been approved <${info.url}|${info.title}> by ${approveOwner}.`,
+    info.body || "",
   ].join("\n");
-  const { slackWebhookUrl, iconUrl, botName } = allInputs;
+  const { apiToken} = allInputs;
 
-  const postSlackResult = await slackClient.postToSlack(
-    slackWebhookUrl,
-    message,
-    { iconUrl, botName }
+  const postSlackResult = await chatworkClient.postToChatwork(
+    apiToken,
+    roomId,
+    message
   );
 
   core.debug(
@@ -176,7 +164,7 @@ export const execApproveMention = async (
     )
   );
 
-  return prOwnerSlackUserId;
+  return accountId;
 };
 
 const buildCurrentJobUrl = (runId: string) => {
@@ -186,47 +174,30 @@ const buildCurrentJobUrl = (runId: string) => {
 
 export const execPostError = async (
   error: Error,
-  allInputs: AllInputs,
-  slackClient: typeof SlackRepositoryImpl
+  allInputs: AllInputs
 ): Promise<void> => {
   const { runId } = allInputs;
   const currentJobUrl = runId ? buildCurrentJobUrl(runId) : undefined;
-  const message = buildSlackErrorMessage(error, currentJobUrl);
+  const message = buildChatworkErrorMessage(error, currentJobUrl);
 
   core.warning(message);
-
-  const { slackWebhookUrl, iconUrl, botName } = allInputs;
-
-  await slackClient.postToSlack(slackWebhookUrl, message, { iconUrl, botName });
 };
 
 const getAllInputs = (): AllInputs => {
-  const slackWebhookUrl = core.getInput("slack-webhook-url", {
+  const configurationPath = core.getInput("configuration-path", {
     required: true,
   });
-
-  if (!slackWebhookUrl) {
-    core.setFailed("Error! Need to set `slack-webhook-url`.");
-  }
-
   const repoToken = core.getInput("repo-token", { required: true });
   if (!repoToken) {
     core.setFailed("Error! Need to set `repo-token`.");
   }
-
-  const iconUrl = core.getInput("icon-url", { required: false });
-  const botName = core.getInput("bot-name", { required: false });
-  const configurationPath = core.getInput("configuration-path", {
-    required: true,
-  });
+  const apiToken = core.getInput("api-token", { required: true });
   const runId = core.getInput("run-id", { required: false });
 
   return {
     repoToken,
     configurationPath,
-    slackWebhookUrl,
-    iconUrl,
-    botName,
+    apiToken,
     runId,
   };
 };
@@ -264,25 +235,19 @@ export const main = async (): Promise<void> => {
         payload,
         allInputs,
         mapping,
-        SlackRepositoryImpl
+        ChatworkRepositoryImpl
       );
       core.debug("finish execPrReviewRequestedMention()");
       return;
     }
-
-    const ignoreSlackIds: string[] = [];
 
     if (needToSendApproveMention(payload)) {
       const sentSlackUserId = await execApproveMention(
         payload,
         allInputs,
         mapping,
-        SlackRepositoryImpl
+        ChatworkRepositoryImpl
       );
-
-      if (sentSlackUserId) {
-        ignoreSlackIds.push(sentSlackUserId);
-      }
 
       core.debug(
         [
@@ -296,12 +261,11 @@ export const main = async (): Promise<void> => {
       payload,
       allInputs,
       mapping,
-      SlackRepositoryImpl,
-      ignoreSlackIds
+      ChatworkRepositoryImpl,
     );
     core.debug("finish execNormalMention()");
   } catch (error: any) {
-    await execPostError(error, allInputs, SlackRepositoryImpl);
+    await execPostError(error, allInputs);
     core.warning(JSON.stringify({ payload }, null, 2));
   }
 };

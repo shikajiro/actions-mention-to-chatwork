@@ -1,22 +1,16 @@
-name: "Github mention to Slack"
-description: "Convert Github mention to Slack mention"
+name: "Github mention to Chatwork"
+description: "Convert Github mention to Chatwork mention"
 inputs:
   configuration-path:
-    description: "Path to config-yaml-file to convert Github username to Slack member ID."
+    description: "Path to config-yaml-file to convert Github username to Chatwork member ID."
     required: true
-    default: ".github/mention-to-slack.yml"
-  slack-webhook-url:
-    description: "Slack Incomming Webhook URL to notify."
+    default: ".github/mention-to-chatwork.yml"
+  api-token:
+    description: "chatwork access token."
     required: true
   repo-token:
-    description: "Github access token to fetch .github/mention-to-slack.yml file."
+    description: "Github access token to fetch .github/mention-to-chatwork.yml file."
     required: true
-  bot-name:
-    description: "Display name for this bot on Slack."
-    required: false
-  icon-url:
-    description: "Display icon url for this bot on Slack."
-    required: false
   run-id:
     description: "Used for the link in the error message when an error occurs."
     required: false

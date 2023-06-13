@@ -1,5 +1,5 @@
 {
-  "name": "actions-mention-to-slack",
+  "name": "actions-mention-to-chatwork",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.ts",
@@ -30,12 +30,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/abeyuya/actions-mention-to-slack.git"
+    "url": "git+https://github.com/shikajiro/actions-mention-to-chatwork.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/abeyuya/actions-mention-to-slack/issues"
+    "url": "https://github.com/shikajiro/actions-mention-to-chatwork/issues"
   },
-  "homepage": "https://github.com/abeyuya/actions-mention-to-slack#readme"
+  "homepage": "https://github.com/shikajiro/actions-mention-to-chatwork#readme"
 }
