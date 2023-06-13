@@ -1,7 +1,7 @@
 import { cloneDeep } from "lodash";
 
 import {
-  convertToSlackUsername,
+  convertToChatworkUsername,
   execPrReviewRequestedMention,
   execNormalMention,
   execApproveMention,
@@ -39,7 +39,7 @@ describe("src/main", () => {
     };
 
     it("should return hits slack member ids", async () => {
-      const result = convertToSlackUsername(
+      const result = convertToChatworkUsername(
         ["github_user_1", "github_user_2"],
         mapping
       );
@@ -48,7 +48,7 @@ describe("src/main", () => {
     });
 
     it("should return empty when no listed github_user", async () => {
-      const result = convertToSlackUsername(
+      const result = convertToChatworkUsername(
         ["github_user_not_listed"],
         mapping
       );
