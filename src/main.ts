@@ -15,7 +15,7 @@ import {
 import {
   MappingConfigRepositoryImpl,
   isUrl,
-  MappingFile,
+  MappingFile, Account,
 } from "./modules/mappingConfig";
 
 export type AllInputs = {
@@ -31,9 +31,8 @@ export const arrayDiff = <T>(arr1: T[], arr2: T[]) =>
 export const convertToSlackUsername = (
   githubUsernames: string[],
   mapping: MappingFile
-): [room_id: string, account_id: string][] => {
+): Account[] => {
   core.debug(JSON.stringify({ githubUsernames }, null, 2));
-
   const slackIds = githubUsernames
     .map((githubUsername) => mapping[githubUsername]);
 
@@ -66,13 +65,13 @@ export const execPrReviewRequestedMention = async (
 
   const title = payload.pull_request?.title;
   const url = payload.pull_request?.html_url;
-  const [roomId, accountId] = slackIds[0];
+  const account = slackIds[0];
   const requestUsername = payload.sender?.login;
 
-  const message = `<@${accountId}> has been requested to review <${url}|${title}> by ${requestUsername}.`;
+  const message = `<@${account.account_id}> has been requested to review <${url}|${title}> by ${requestUsername}.`;
   const { apiToken } = allInputs;
 
-  await chatworkClient.postToChatwork(apiToken, roomId, message);
+  await chatworkClient.postToChatwork(apiToken, account.room_id, message);
 };
 
 export const execNormalMention = async (
@@ -101,9 +100,9 @@ export const execNormalMention = async (
     return;
   }
 
-  for (const [roomId, accountId] of slackIds) {
+  for (const account of slackIds) {
     const message = buildChatworkPostMessage(
-        [accountId],
+        [account.account_id],
         info.title,
         info.url,
         info.body,
@@ -112,7 +111,7 @@ export const execNormalMention = async (
 
     const {apiToken} = allInputs;
 
-    const result = await chatworkClient.postToChatwork(apiToken, roomId, message);
+    const result = await chatworkClient.postToChatwork(apiToken, account.room_id, message);
 
     core.debug(
         ["postToSlack result", JSON.stringify({result}, null, 2)].join("\n")
@@ -144,17 +143,17 @@ export const execApproveMention = async (
   }
 
   const info = pickupInfoFromGithubPayload(payload);
-  const [roomId, accountId] = slackIds[0];
+  const account = slackIds[0];
   const approveOwner = payload.sender?.login;
   const message = [
-    `<@${accountId}> has been approved <${info.url}|${info.title}> by ${approveOwner}.`,
+    `<@${account.account_id}> has been approved <${info.url}|${info.title}> by ${approveOwner}.`,
     info.body || "",
   ].join("\n");
   const { apiToken} = allInputs;
 
   const postSlackResult = await chatworkClient.postToChatwork(
     apiToken,
-    roomId,
+    account.room_id,
     message
   );
 
@@ -164,7 +163,7 @@ export const execApproveMention = async (
     )
   );
 
-  return accountId;
+  return account.account_id;
 };
 
 const buildCurrentJobUrl = (runId: string) => {

@@ -6,7 +6,12 @@ const pattern = /https?:\/\/[-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+/g;
 export const isUrl = (text: string) => pattern.test(text);
 
 export type MappingFile = {
-  [githubUsername: string]: [room_id: string, account_id: string];
+  [githubUsername: string]: Account
+};
+
+export type Account = {
+    room_id: string,
+    account_id: string
 };
 
 export const MappingConfigRepositoryImpl = {
