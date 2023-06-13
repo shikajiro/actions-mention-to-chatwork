@@ -23,7 +23,7 @@ export const buildChatworkErrorMessage = (
   error: Error,
   currentJobUrl?: string
 ): string => {
-  const jobTitle = "mention-to-slack action";
+  const jobTitle = "mention-to-chatwork action";
   const jobLinkMessage = currentJobUrl
     ? `<${currentJobUrl}|${jobTitle}>`
     : jobTitle;
