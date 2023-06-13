@@ -13,7 +13,7 @@ export const buildChatworkPostMessage = (
   const message = [
     mentionBlock,
     `${chatworkIdsForMention.length === 1 ? "has" : "have"}`,
-    `been mentioned at <${commentLink}|${issueTitle}> by ${senderName}`,
+    `been mentioned at ${commentLink} ${issueTitle} by ${senderName}`,
   ].join(" ");
 
   return `${message}\n${body}`;
@@ -25,7 +25,7 @@ export const buildChatworkErrorMessage = (
 ): string => {
   const jobTitle = "mention-to-chatwork action";
   const jobLinkMessage = currentJobUrl
-    ? `<${currentJobUrl}|${jobTitle}>`
+    ? `${currentJobUrl} ${jobTitle}`
     : jobTitle;
 
   const issueBody = error.stack
@@ -39,7 +39,7 @@ export const buildChatworkErrorMessage = (
   return [
     `❗ An internal error occurred in ${jobLinkMessage}`,
     "(but action didn't fail as this action is not critical).",
-    `To solve the problem, please <${link}|open an issue>`,
+    `To solve the problem, please ${link} open an issue`,
     "",
     "```",
     error.stack || error.message,

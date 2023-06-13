@@ -28,7 +28,7 @@ export type AllInputs = {
 export const arrayDiff = <T>(arr1: T[], arr2: T[]) =>
   arr1.filter((i) => arr2.indexOf(i) === -1);
 
-export const convertToSlackUsername = (
+export const convertToChatworkUsername = (
   githubUsernames: string[],
   mapping: MappingFile
 ): Account[] => {
@@ -54,7 +54,7 @@ export const execPrReviewRequestedMention = async (
     throw new Error("Can not find review requested user.");
   }
 
-  const slackIds = convertToSlackUsername([requestedGithubUsername], mapping);
+  const slackIds = convertToChatworkUsername([requestedGithubUsername], mapping);
 
   if (slackIds.length === 0) {
     core.debug(
@@ -68,7 +68,7 @@ export const execPrReviewRequestedMention = async (
   const account = slackIds[0];
   const requestUsername = payload.sender?.login;
 
-  const message = `<@${account.account_id}> has been requested to review <${url}|${title}> by ${requestUsername}.`;
+  const message = `[To:${account.account_id}] has been requested to review ${url} ${title} by ${requestUsername}.`;
   const { apiToken } = allInputs;
 
   await chatworkClient.postToChatwork(apiToken, account.room_id, message);
@@ -93,7 +93,7 @@ export const execNormalMention = async (
     return;
   }
 
-  const slackIds = convertToSlackUsername(githubUsernames, mapping);
+  const slackIds = convertToChatworkUsername(githubUsernames, mapping);
 
   if (slackIds.length === 0) {
     core.debug("finish execNormalMention because slackIds.length === 0");
@@ -135,7 +135,7 @@ export const execApproveMention = async (
     throw new Error("Can not find pr owner user.");
   }
 
-  const slackIds = convertToSlackUsername([prOwnerGithubUsername], mapping);
+  const slackIds = convertToChatworkUsername([prOwnerGithubUsername], mapping);
 
   if (slackIds.length === 0) {
     core.debug("finish execApproveMention because slackIds.length === 0");
@@ -146,7 +146,7 @@ export const execApproveMention = async (
   const account = slackIds[0];
   const approveOwner = payload.sender?.login;
   const message = [
-    `<@${account.account_id}> has been approved <${info.url}|${info.title}> by ${approveOwner}.`,
+    `[To:${account.account_id}] has been approved ${info.url} ${info.title} by ${approveOwner}.`,
     info.body || "",
   ].join("\n");
   const { apiToken} = allInputs;
