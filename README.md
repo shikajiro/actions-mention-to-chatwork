@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run
-        uses: shikajiro/actions-mention-to-chatwork@v2
+        uses: shikajiro/actions-mention-to-chatwork@v0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           api-token: ${{ secrets.CHATWORK_API_TOKEN }}
