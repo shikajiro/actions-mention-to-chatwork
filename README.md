@@ -12,12 +12,12 @@ This action sends mention to your Chatwork account when you have been mentioned 
 
 ## Inputs
 
-| Name               | Required | Default                      | Description                                                                                                                                                 |
-|:-------------------| :------- | :--------------------------- |:------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| configuration-path | Yes      | .github/mention-to-Chatwork.yml | Path to config-yaml-file to convert Github username to Chatwork member ID. You can use local file path or URL like https://github.com/path/to/yaml_raw_file |
-| repo-token         | Yes      | Null                         | Github access token to fetch .github/mention-to-chatwork.yml file.                                                                                          |
-| api-token          | Yes       | Null      | Chatwork access token.                                                                                                                                      |
-| run-id             | No       | Null                         | Used for the link in the error message when an error occurs.                                                                                                |
+| Name               | Required | Default                         | Description                                                                                                                                                 |
+|:-------------------| :------- |:--------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| configuration-path | Yes      | .github/mention-to-chatwork.yml | Path to config-yaml-file to convert Github username to Chatwork member ID. You can use local file path or URL like https://github.com/path/to/yaml_raw_file |
+| repo-token         | Yes      | Null                            | Github access token to fetch .github/mention-to-chatwork.yml file.                                                                                          |
+| api-token          | Yes       | Null                            | Chatwork access token.                                                                                                                                      |
+| run-id             | No       | Null                            | Used for the link in the error message when an error occurs.                                                                                                |
 
 ## Example usage
 
@@ -37,7 +37,7 @@ on:
     types: [created, edited]
 
 jobs:
-  mention-to-Chatwork:
+  mention-to-chatwork:
     runs-on: ubuntu-latest
     steps:
       - name: Run
