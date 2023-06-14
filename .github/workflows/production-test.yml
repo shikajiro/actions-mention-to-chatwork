@@ -7,20 +7,22 @@ on:
 
 jobs:
   comment-to-issue:
+    permissions:
+      issues: write
+      pull-requests: write
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Create comment
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v3
         with:
-          repository: abeyuya/github-actions-test
-          token: ${{ secrets.MY_GITHUB_TOKEN }}
+          repository: shikajiro/github-actions-test
           issue-number: 7
           body: |
-            hey @abeyuya!
-            This is a test comment from [ci](https://github.com/abeyuya/actions-mention-to-slack/actions/runs/${{ github.run_id }}) to test abeyuya/actions-mention-to-slack.
+            hey @shikajiro!
+            This is a test comment from [ci](https://github.com/shikajiro/actions-mention-to-chatwork/actions/runs/${{ github.run_id }}) to test shikajiro/actions-mention-to-chatwork.
 
-            [${{ github.event.head_commit.message }}](https://github.com/abeyuya/actions-mention-to-slack/commit/${{ github.sha }})
+            [${{ github.event.head_commit.message }}](https://github.com/shikajiro/actions-mention-to-chatwork/commit/${{ github.sha }})
 
             - With GitHub **Markdown** :sparkles:
             - Created by [create-or-update-comment][1]
