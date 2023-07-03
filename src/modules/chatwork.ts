@@ -68,4 +68,25 @@ export const ChatworkRepositoryImpl = {
 
     return result.data;
   },
+  createChatworkTask: async (
+    apiToken: string,
+    roomId: string,
+    accountId: string,
+    message: string
+  ): Promise<ChatworkPostResult> => {
+    const chatworkUrl = `https://api.chatwork.com/v2/rooms/${roomId}/tasks`
+
+    const encodedParams = new URLSearchParams();
+    encodedParams.set('body', message);
+    encodedParams.set('to_ids', accountId);
+    const result = await axios.post<ChatworkPostResult>(
+      chatworkUrl,
+      encodedParams,
+      {
+        headers: { "X-ChatWorkToken": apiToken },
+      }
+    );
+
+    return result.data;
+  },
 };

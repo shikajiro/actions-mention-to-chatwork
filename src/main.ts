@@ -23,6 +23,8 @@ export type AllInputs = {
   configurationPath: string;
   apiToken: string;
   runId?: string;
+  reviewRequest?: string;
+  action?: string;
 };
 
 export const arrayDiff = <T>(arr1: T[], arr2: T[]) =>
@@ -39,6 +41,41 @@ export const convertToChatworkUsername = (
   core.debug(JSON.stringify({ slackIds }, null, 2));
 
   return slackIds;
+};
+
+export const execArtifact = async (
+  owner: string,
+  repo: string,
+  payload: WebhookPayload,
+  allInputs: AllInputs,
+  mapping: MappingFile,
+  chatworkClient: Pick<typeof ChatworkRepositoryImpl, "createChatworkTask">
+): Promise<void> => {
+  const requestedGithubUsername =
+    payload.requested_reviewer?.login || payload.requested_team?.name;
+
+  if (!requestedGithubUsername) {
+    throw new Error("Can not find review requested user.");
+  }
+
+  const slackIds = convertToChatworkUsername([requestedGithubUsername], mapping);
+
+  if (slackIds.length === 0) {
+    core.debug(
+      "finish execPrReviewRequestedMention because slackIds.length === 0"
+    );
+    return;
+  }
+
+  const account = slackIds[0];
+  const requestUsername = payload.sender?.login;
+  const prUrl = payload.pull_request?.html_url;
+
+  const url = `https://github.com/${owner}/${repo}/actions/runs/${allInputs.runId}`
+  const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prUrl} API:${url} by ${requestUsername}.`;
+  const { apiToken } = allInputs;
+
+  await chatworkClient.createChatworkTask(apiToken, account.room_id, account.account_id, message);
 };
 
 export const execPrReviewRequestedMention = async (
@@ -146,7 +183,7 @@ export const execApproveMention = async (
   const account = slackIds[0];
   const approveOwner = payload.sender?.login;
   const message = [
-    `[To:${account.account_id}] has been approved ${info.url} ${info.title} by ${approveOwner}.`,
+    `[To:${account.account_id}] (cracker) has been approved ${info.url} ${info.title} by ${approveOwner}.`,
     info.body || "",
   ].join("\n");
   const { apiToken} = allInputs;
@@ -192,12 +229,16 @@ const getAllInputs = (): AllInputs => {
   }
   const apiToken = core.getInput("api-token", { required: true });
   const runId = core.getInput("run-id", { required: false });
+  const reviewRequest = core.getInput("review-request", { required: true });
+  const action = core.getInput("action", { required: false });
 
   return {
     repoToken,
     configurationPath,
     apiToken,
     runId,
+    reviewRequest,
+    action,
   };
 };
 
@@ -210,7 +251,7 @@ export const main = async (): Promise<void> => {
   const allInputs = getAllInputs();
   core.debug(JSON.stringify({ allInputs }, null, 2));
 
-  const { repoToken, configurationPath } = allInputs;
+  const { repoToken, configurationPath, reviewRequest,  action } = allInputs;
 
   try {
     const mapping = await (async () => {
@@ -229,7 +270,20 @@ export const main = async (): Promise<void> => {
 
     core.debug(JSON.stringify({ mapping }, null, 2));
 
-    if (payload.action === "review_requested") {
+    if(action === "artifact") {
+      await execArtifact(
+        context.repo.owner,
+        context.repo.repo,
+        payload,
+        allInputs,
+        mapping,
+        ChatworkRepositoryImpl
+      )
+      core.debug("finish execArtifact()");
+      return;
+    }
+
+    if (reviewRequest && payload.action === "review_requested") {
       await execPrReviewRequestedMention(
         payload,
         allInputs,
