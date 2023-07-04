@@ -52,10 +52,10 @@ export const execArtifact = async (
   chatworkClient: Pick<typeof ChatworkRepositoryImpl, "createChatworkTask">
 ): Promise<void> => {
   core.info(`pull_request ${ JSON.stringify(payload.pull_request, null, 2)}`);
-  core.info(`login ${ payload.pull_request?.requested_reviewer?.login}`);
-  core.info(`team ${ payload.pull_request?.requested_team?.name}`);
+  core.info(`login ${ payload.pull_request?.requested_reviewers[0]?.login}`);
+  core.info(`team ${ payload.pull_request?.requested_teams[0]?.name}`);
   const requestedGithubUsername =
-    payload.pull_request?.requested_reviewer?.login || payload.pull_request?.requested_team?.name;
+    payload.pull_request?.requested_reviewers[0]?.login || payload.pull_request?.requested_teams[0]?.name;
 
   if (!requestedGithubUsername) {
     throw new Error("Can not find review requested user.");
