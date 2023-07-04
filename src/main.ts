@@ -51,7 +51,7 @@ export const execArtifact = async (
   mapping: MappingFile,
   chatworkClient: Pick<typeof ChatworkRepositoryImpl, "createChatworkTask">
 ): Promise<void> => {
-  core.info(`pull_request ${payload.pull_request}`);
+  core.info(`pull_request ${ JSON.stringify(payload.pull_request, null, 2)}`);
   const requestedGithubUsername =
     payload.requested_reviewer?.login || payload.requested_team?.name;
 
