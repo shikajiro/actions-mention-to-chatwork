@@ -44,8 +44,6 @@ export const convertToChatworkUsername = (
 };
 
 export const execArtifact = async (
-  owner: string,
-  repo: string,
   payload: WebhookPayload,
   allInputs: AllInputs,
   mapping: MappingFile,
@@ -74,8 +72,7 @@ export const execArtifact = async (
   const requestUsername = payload.sender?.login;
   const prUrl = payload.pull_request?.html_url;
 
-  const url = `https://github.com/${owner}/${repo}/actions/runs/${allInputs.runId}`
-  const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prUrl} API:${url} by ${requestUsername}.`;
+  const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prUrl} by ${requestUsername}.`;
   const { apiToken } = allInputs;
 
   await chatworkClient.createChatworkTask(apiToken, account.room_id, account.account_id, message);
@@ -275,8 +272,6 @@ export const main = async (): Promise<void> => {
 
     if(action === "artifact") {
       await execArtifact(
-        context.repo.owner,
-        context.repo.repo,
         payload,
         allInputs,
         mapping,
