@@ -83,17 +83,17 @@ export const ChatworkRepositoryImpl = {
     const is2weeks = labels.find((label) => label === '2weeks');
     let limit = 0;
     const now = new Date();
-    if(isHurry !== null) {
-        limit = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).getTime();
-    }else if(is2days !== null) {
-        limit = new Date(now.getFullYear(), now.getMonth(), now.getDate()+2, 23, 59, 59).getTime();
-    }else if(is2weeks !== null) {
-        limit = new Date(now.getFullYear(), now.getMonth(), now.getDate()+14, 23, 59, 59).getTime();
+    if(isHurry !== undefined) {
+        limit = new Date(now.getFullYear(), now.getMonth()-1, now.getDate(), 23, 59, 59).getTime();
+    }else if(is2days !== undefined) {
+        limit = new Date(now.getFullYear(), now.getMonth()-1, now.getDate()+2, 23, 59, 59).getTime();
+    }else if(is2weeks !== undefined) {
+        limit = new Date(now.getFullYear(), now.getMonth()-1, now.getDate()+14, 23, 59, 59).getTime();
     }
     const encodedParams = new URLSearchParams();
     encodedParams.set('body', message);
     encodedParams.set('to_ids', accountId);
-    encodedParams.set('limit', `${limit/ 1000}`);
+    encodedParams.set('limit', `${limit / 1000}`);
     encodedParams.set('limit_type', "date");
     core.info(`param ${encodedParams}`);
     const result = await axios.post<ChatworkPostResult>(
