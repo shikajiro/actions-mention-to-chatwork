@@ -72,13 +72,28 @@ export const ChatworkRepositoryImpl = {
     apiToken: string,
     roomId: string,
     accountId: string,
-    message: string
+    message: string,
+    labels: string[]
   ): Promise<ChatworkPostResult> => {
-    const chatworkUrl = `https://api.chatwork.com/v2/rooms/${roomId}/tasks`
+    const chatworkUrl = `https://api.chatwork.com/v2/rooms/${roomId}/tasks`;
 
+    const isHurry = labels.find((label) => label === 'hurry');
+    const is2days = labels.find((label) => label === '2days');
+    const is2weeks = labels.find((label) => label === '2weeks');
+    let limit = 0;
+    const now = new Date();
+    if(isHurry !== null) {
+        limit = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).getTime();
+    }else if(is2days !== null) {
+        limit = new Date(now.getFullYear(), now.getMonth(), now.getDate()+2, 23, 59, 59).getTime();
+    }else if(is2weeks !== null) {
+        limit = new Date(now.getFullYear(), now.getMonth(), now.getDate()+14, 23, 59, 59).getTime();
+    }
     const encodedParams = new URLSearchParams();
     encodedParams.set('body', message);
     encodedParams.set('to_ids', accountId);
+    encodedParams.set('limit', limit.toString());
+    encodedParams.set('limit_type', "date");
     const result = await axios.post<ChatworkPostResult>(
       chatworkUrl,
       encodedParams,

@@ -51,7 +51,6 @@ export const execArtifact = async (
 ): Promise<void> => {
   core.info(`pull_request ${ JSON.stringify(payload.pull_request, null, 2)}`);
   core.info(`login ${ payload.pull_request?.requested_reviewers[0]?.login}`);
-  core.info(`team ${ payload.pull_request?.requested_teams[0]?.name}`);
   const requestedGithubUsername =
     payload.pull_request?.requested_reviewers[0]?.login || payload.pull_request?.requested_teams[0]?.name;
 
@@ -59,8 +58,15 @@ export const execArtifact = async (
     throw new Error("Can not find review requested user.");
   }
 
-  const slackIds = convertToChatworkUsername([requestedGithubUsername], mapping);
+  core.info(`labels ${ payload.pull_request?.labels[0]?.name}`);
+  const labels = payload.pull_request?.labels
+      ?.map((label:any) => label.name)
+      ?.filter((name:any) => name === 'hurry' || name === '2days' || name === '2weeks') as string[];
+  if (labels?.length === 0) {
+    throw new Error("Can not find review requested user.");
+  }
 
+  const slackIds = convertToChatworkUsername([requestedGithubUsername], mapping);
   if (slackIds.length === 0) {
     core.debug(
       "finish execPrReviewRequestedMention because slackIds.length === 0"
@@ -75,7 +81,7 @@ export const execArtifact = async (
   const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prUrl} by ${requestUsername}.`;
   const { apiToken } = allInputs;
 
-  await chatworkClient.createChatworkTask(apiToken, account.room_id, account.account_id, message);
+  await chatworkClient.createChatworkTask(apiToken, account.room_id, account.account_id, message, labels);
 };
 
 export const execPrReviewRequestedMention = async (
