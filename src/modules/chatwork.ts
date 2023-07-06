@@ -1,3 +1,4 @@
+import * as core from "@actions/core";
 import axios from "axios";
 
 export const buildChatworkPostMessage = (
@@ -92,8 +93,9 @@ export const ChatworkRepositoryImpl = {
     const encodedParams = new URLSearchParams();
     encodedParams.set('body', message);
     encodedParams.set('to_ids', accountId);
-    encodedParams.set('limit', limit.toString());
+    encodedParams.set('limit', `${limit/ 1000}`);
     encodedParams.set('limit_type', "date");
+    core.info(`param ${encodedParams}`);
     const result = await axios.post<ChatworkPostResult>(
       chatworkUrl,
       encodedParams,
