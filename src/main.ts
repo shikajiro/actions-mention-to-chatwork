@@ -49,7 +49,7 @@ export const execArtifact = async (
   mapping: MappingFile,
   chatworkClient: Pick<typeof ChatworkRepositoryImpl, "createChatworkTask">
 ): Promise<void> => {
-  core.info(`pull_request ${ JSON.stringify(payload.pull_request, null, 2)}`);
+  core.info(`pull_request ${ JSON.stringify(payload, null, 2)}`);
   core.info(`login ${ payload.pull_request?.requested_reviewers[0]?.login}`);
   const requestedGithubUsername =
     payload.pull_request?.requested_reviewers[0]?.login || payload.pull_request?.requested_teams[0]?.name;
