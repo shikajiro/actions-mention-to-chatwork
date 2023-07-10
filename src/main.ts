@@ -62,9 +62,6 @@ export const execArtifact = async (
   const labels = payload.pull_request?.labels
       ?.map((label:any) => label.name)
       ?.filter((name:any) => name === 'hurry' || name === '2days' || name === '2weeks') as string[];
-  if (labels?.length === 0) {
-    throw new Error("Can not find label.");
-  }
 
   const slackIds = convertToChatworkUsername([requestedGithubUsername], mapping);
   if (slackIds.length === 0) {
