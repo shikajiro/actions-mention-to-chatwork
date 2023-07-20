@@ -123,6 +123,7 @@ export const ChatworkRepositoryImpl = {
         headers: { "X-ChatWorkToken": apiToken },
       }
     );
+    core.info(`result data ${result.data}`);
 
     const task = result.data.find((task) => task.body === message );
     return !!task;
