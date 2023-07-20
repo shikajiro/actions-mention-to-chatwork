@@ -50,6 +50,11 @@ export const buildChatworkErrorMessage = (
 const openIssueLink =
   "https://github.com/shikajiro/actions-mention-to-chatwork/issues/new";
 type ChatworkPostResult = Record<string, unknown>;
+type ChatworkGetTaskResult = [
+  {
+    body: string
+  }
+];
 
 export const ChatworkRepositoryImpl = {
   postToChatwork: async (
@@ -69,6 +74,7 @@ export const ChatworkRepositoryImpl = {
 
     return result.data;
   },
+
   createChatworkTask: async (
     apiToken: string,
     roomId: string,
@@ -81,12 +87,12 @@ export const ChatworkRepositoryImpl = {
     let limit = 0;
     const now = new Date();
     if(isHurry !== undefined) {
-      limit = new Date(now.getFullYear(), now.getMonth()-1, now.getDate(), 23, 59, 59).getTime();
+      limit = new Date(now.getFullYear(), now.getMonth()+1, now.getDate(), 23, 59, 59).getTime();
     }else if(is2days !== undefined) {
-      limit = new Date(now.getFullYear(), now.getMonth()-1, now.getDate()+2, 23, 59, 59).getTime();
+      limit = new Date(now.getFullYear(), now.getMonth()+1, now.getDate()+2, 23, 59, 59).getTime();
     }else{
       // is2weeks or default
-      limit = new Date(now.getFullYear(), now.getMonth()-1, now.getDate()+14, 23, 59, 59).getTime();
+      limit = new Date(now.getFullYear(), now.getMonth()+1, now.getDate()+14, 23, 59, 59).getTime();
     }
     const encodedParams = new URLSearchParams();
     encodedParams.set('body', message);
@@ -103,5 +109,22 @@ export const ChatworkRepositoryImpl = {
     );
 
     return result.data;
+  },
+
+  existChatworkTask: async (
+    apiToken: string,
+    roomId: string,
+    accountId: string,
+    message: string,
+  ): Promise<boolean> => {
+    const result = await axios.get<ChatworkGetTaskResult>(
+      `https://api.chatwork.com/v2/rooms/${roomId}/tasks?account_id=${accountId}&status=open`,
+      {
+        headers: { "X-ChatWorkToken": apiToken },
+      }
+    );
+
+    const task = result.data.find((task) => task.body === message );
+    return !!task;
   },
 };

@@ -47,7 +47,7 @@ export const execArtifact = async (
   payload: WebhookPayload,
   allInputs: AllInputs,
   mapping: MappingFile,
-  chatworkClient: Pick<typeof ChatworkRepositoryImpl, "createChatworkTask">
+  chatworkClient: Pick<typeof ChatworkRepositoryImpl, "existChatworkTask" | "createChatworkTask">
 ): Promise<void> => {
   core.info(`pull_request ${ JSON.stringify(payload, null, 2)}`);
   core.info(`login ${ payload.pull_request?.requested_reviewers[0]?.login}`);
@@ -77,6 +77,12 @@ export const execArtifact = async (
 
   const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prUrl} by ${requestUsername}.`;
   const { apiToken } = allInputs;
+
+  const exist = await chatworkClient.existChatworkTask(apiToken, account.room_id, account.account_id, message);
+  if (exist) {
+    core.info(`already exist ${message}`);
+    return;
+  }
 
   await chatworkClient.createChatworkTask(apiToken, account.room_id, account.account_id, message, labels);
 };
