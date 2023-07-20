@@ -124,6 +124,7 @@ export const ChatworkRepositoryImpl = {
       }
     );
     core.info(`result data ${result.data}`);
+    if(!result.data) return false;
 
     const task = result.data.find((task) => task.body === message );
     return !!task;
