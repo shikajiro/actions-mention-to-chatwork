@@ -49,7 +49,7 @@ export const execArtifact = async (
   mapping: MappingFile,
   chatworkClient: Pick<typeof ChatworkRepositoryImpl, "existChatworkTask" | "createChatworkTask">
 ): Promise<void> => {
-  const name = payload.repository?.name;
+  const name = payload.repository?.full_name;
   if (name === undefined) {
     throw new Error("Can not find repository name.");
   }
