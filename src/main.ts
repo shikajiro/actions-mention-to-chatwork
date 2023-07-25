@@ -3,9 +3,9 @@ import { context } from "@actions/github";
 import { WebhookPayload } from "@actions/github/lib/interfaces";
 
 import {
-  pickupUsername,
-  pickupInfoFromGithubPayload,
-  needToSendApproveMention,
+    pickupUsername,
+    pickupInfoFromGithubPayload,
+    needToSendApproveMention, latestReviewer,
 } from "./modules/github";
 import {
   buildChatworkErrorMessage,
@@ -49,25 +49,30 @@ export const execArtifact = async (
   mapping: MappingFile,
   chatworkClient: Pick<typeof ChatworkRepositoryImpl, "existChatworkTask" | "createChatworkTask">
 ): Promise<void> => {
-  core.info(`pull_request ${ JSON.stringify(payload, null, 2)}`);
-  core.info(`login ${ payload.pull_request?.requested_reviewers[0]?.login}`);
-  const requestedGithubUsername =
-    payload.pull_request?.requested_reviewers[0]?.login || payload.pull_request?.requested_teams[0]?.name;
+  const name = payload.repository?.name;
+  if (name === undefined) {
+    throw new Error("Can not find repository name.");
+  }
 
-  if (!requestedGithubUsername) {
+  const number = payload.pull_request?.number;
+  if (number === undefined) {
+    throw new Error("Can not find pull request number.");
+  }
+
+  const reviewer = await latestReviewer(name, number, allInputs.repoToken)
+  if (reviewer === null) {
     throw new Error("Can not find review requested user.");
   }
+  core.info(`reviewer ${ reviewer }`);
 
   core.info(`labels ${ payload.pull_request?.labels[0]?.name}`);
   const labels = payload.pull_request?.labels
       ?.map((label:any) => label.name)
       ?.filter((name:any) => name === 'hurry' || name === '2days' || name === '2weeks') as string[];
 
-  const slackIds = convertToChatworkUsername([requestedGithubUsername], mapping);
+  const slackIds = convertToChatworkUsername([reviewer], mapping);
   if (slackIds.length === 0) {
-    core.debug(
-      "finish execPrReviewRequestedMention because slackIds.length === 0"
-    );
+    core.debug("finish execPrReviewRequestedMention because slackIds.length === 0");
     return;
   }
 
