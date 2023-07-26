@@ -79,8 +79,9 @@ export const execArtifact = async (
   const account = slackIds[0];
   const requestUsername = payload.sender?.login;
   const prUrl = payload.pull_request?.html_url;
+  const prTitle = payload.pull_request?.title;
 
-  const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prUrl} by ${requestUsername}.`;
+  const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prTitle} ${prUrl} by ${requestUsername}.`;
   const { apiToken } = allInputs;
 
   const exist = await chatworkClient.existChatworkTask(apiToken, account.room_id, account.account_id, message);
