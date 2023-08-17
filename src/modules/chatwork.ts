@@ -87,12 +87,12 @@ export const ChatworkRepositoryImpl = {
     let limit = 0;
     const now = new Date();
     if(isHurry !== undefined) {
-      limit = new Date(now.getFullYear(), now.getMonth()+1, now.getDate(), 23, 59, 59).getTime();
+      limit = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).getTime();
     }else if(is2days !== undefined) {
-      limit = new Date(now.getFullYear(), now.getMonth()+1, now.getDate()+2, 23, 59, 59).getTime();
+      limit = new Date(now.getFullYear(), now.getMonth(), now.getDate()+2, 23, 59, 59).getTime();
     }else{
       // is2weeks or default
-      limit = new Date(now.getFullYear(), now.getMonth()+1, now.getDate()+14, 23, 59, 59).getTime();
+      limit = new Date(now.getFullYear(), now.getMonth(), now.getDate()+14, 23, 59, 59).getTime();
     }
     const encodedParams = new URLSearchParams();
     encodedParams.set('body', message);
