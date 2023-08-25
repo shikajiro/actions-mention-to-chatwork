@@ -77,6 +77,11 @@ export const execArtifact = async (
   }
 
   const account = slackIds[0];
+  const roomId = account.room_id;
+  if (roomId === undefined) {
+    throw new Error("Can not find room ID.");
+  }
+
   const requestUsername = payload.sender?.login;
   const prUrl = payload.pull_request?.html_url;
   const prTitle = payload.pull_request?.title;
@@ -84,7 +89,7 @@ export const execArtifact = async (
   const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prTitle} ${prUrl} by ${requestUsername}.`;
   const { apiToken } = allInputs;
 
-  const exist = await chatworkClient.existChatworkTask(apiToken, account.room_id, account.account_id, message);
+  const exist = await chatworkClient.existChatworkTask(apiToken, roomId, account.account_id, message);
   if (exist) {
     core.info(`already exist ${message}`);
     return;
@@ -115,15 +120,20 @@ export const execPrReviewRequestedMention = async (
     return;
   }
 
+  const account = slackIds[0];
+  const roomId = account.room_id;
+  if (roomId === undefined) {
+    throw new Error("Can not find room ID.");
+  }
+
   const title = payload.pull_request?.title;
   const url = payload.pull_request?.html_url;
-  const account = slackIds[0];
   const requestUsername = payload.sender?.login;
 
   const message = `[To:${account.account_id}] has been requested to review ${url} ${title} by ${requestUsername}.`;
   const { apiToken } = allInputs;
 
-  await chatworkClient.postToChatwork(apiToken, account.room_id, message);
+  await chatworkClient.postToChatwork(apiToken, roomId, message);
 };
 
 export const execNormalMention = async (
@@ -153,6 +163,11 @@ export const execNormalMention = async (
   }
 
   for (const account of slackIds) {
+    const roomId = account.room_id;
+    if (roomId === undefined) {
+      continue;
+    }
+
     const message = buildChatworkPostMessage(
         [account.account_id],
         info.title,
@@ -163,7 +178,7 @@ export const execNormalMention = async (
 
     const {apiToken} = allInputs;
 
-    const result = await chatworkClient.postToChatwork(apiToken, account.room_id, message);
+    const result = await chatworkClient.postToChatwork(apiToken, roomId, message);
 
     core.debug(
         ["postToSlack result", JSON.stringify({result}, null, 2)].join("\n")
@@ -194,8 +209,13 @@ export const execApproveMention = async (
     return null;
   }
 
-  const info = pickupInfoFromGithubPayload(payload);
   const account = slackIds[0];
+  const roomId = account.room_id;
+  if (roomId === undefined) {
+    throw new Error("Can not find room ID.");
+  }
+
+  const info = pickupInfoFromGithubPayload(payload);
   const approveOwner = payload.sender?.login;
   const message = [
     `[To:${account.account_id}] (cracker) has been approved ${info.url} ${info.title} by ${approveOwner}.`,
