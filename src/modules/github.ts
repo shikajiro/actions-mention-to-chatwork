@@ -1,6 +1,8 @@
 import { WebhookPayload } from "@actions/github/lib/interfaces";
 import axios from "axios";
 import * as core from "@actions/core";
+import {convertToChatworkUsername} from "../main";
+import {MappingFile} from "./mappingConfig";
 
 const uniq = <T>(arr: T[]): T[] => [...new Set(arr)];
 
@@ -35,6 +37,29 @@ export const needToSendApproveMention = (payload: WebhookPayload): boolean => {
   }
 
   return false;
+};
+
+export const needToMention = (payload: WebhookPayload, mapping: MappingFile,): boolean => {
+  const info = pickupInfoFromGithubPayload(payload);
+
+  if (info.body === null) {
+    core.debug("finish execNormalMention because info.body === null");
+    return false;
+  }
+
+  const githubUsernames = pickupUsername(info.body);
+  if (githubUsernames.length === 0) {
+    core.debug("finish execNormalMention because githubUsernames.length === 0");
+    return false;
+  }
+
+  const slackIds = convertToChatworkUsername(githubUsernames, mapping);
+  if (slackIds.length === 0) {
+    core.debug("finish execNormalMention because slackIds.length === 0");
+    return false;
+  }
+
+  return true;
 };
 
 type GithubGetReviewerResult = {

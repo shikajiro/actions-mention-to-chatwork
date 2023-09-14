@@ -3,12 +3,12 @@ import { context } from "@actions/github";
 import { WebhookPayload } from "@actions/github/lib/interfaces";
 
 import {
-    pickupUsername,
-    pickupInfoFromGithubPayload,
-    needToSendApproveMention, latestReviewer,
+  pickupUsername,
+  pickupInfoFromGithubPayload,
+  needToSendApproveMention, latestReviewer, needToMention,
 } from "./modules/github";
 import {
-  buildChatworkErrorMessage,
+  buildChatworkErrorMessage, buildChatworkPostMentionMessage,
   buildChatworkPostMessage,
   ChatworkRepositoryImpl,
 } from "./modules/chatwork";
@@ -136,6 +136,36 @@ export const execPrReviewRequestedMention = async (
   await chatworkClient.postToChatwork(apiToken, roomId, message);
 };
 
+export const execNormalComment = async (
+  payload: WebhookPayload,
+  allInputs: AllInputs,
+  mapping: MappingFile,
+  chatworkClient: Pick<typeof ChatworkRepositoryImpl, "postToChatwork">
+): Promise<void> => {
+  const info = pickupInfoFromGithubPayload(payload);
+
+  if (info.body === null) {
+    core.debug("finish execNormalMention because info.body === null");
+    return;
+  }
+
+  const message = buildChatworkPostMessage(
+      info.title,
+      info.url,
+      info.body,
+      info.senderName
+  );
+
+  const account = mapping[info.senderName];
+
+  const result = await chatworkClient.postToChatwork(allInputs.apiToken, account.room_id, message);
+
+  core.debug(
+      ["postToSlack result", JSON.stringify({result}, null, 2)].join("\n")
+  );
+
+};
+
 export const execNormalMention = async (
   payload: WebhookPayload,
   allInputs: AllInputs,
@@ -168,7 +198,7 @@ export const execNormalMention = async (
       continue;
     }
 
-    const message = buildChatworkPostMessage(
+    const message = buildChatworkPostMentionMessage(
         [account.account_id],
         info.title,
         info.url,
@@ -341,15 +371,28 @@ export const main = async (): Promise<void> => {
           JSON.stringify({ sentSlackUserId }, null, 2),
         ].join("\n")
       );
+      return;
     }
 
-    await execNormalMention(
-      payload,
-      allInputs,
-      mapping,
-      ChatworkRepositoryImpl,
-    );
-    core.debug("finish execNormalMention()");
+    if (needToMention(payload, mapping)) {
+      await execNormalMention(
+          payload,
+          allInputs,
+          mapping,
+          ChatworkRepositoryImpl,
+      );
+      core.debug("finish execNormalMention()");
+      return;
+    }
+
+    await execNormalComment(
+          payload,
+          allInputs,
+          mapping,
+          ChatworkRepositoryImpl,
+      );
+    core.debug("finish execNormalComment()");
+
   } catch (error: any) {
     await execPostError(error, allInputs);
     core.warning(JSON.stringify({ payload }, null, 2));

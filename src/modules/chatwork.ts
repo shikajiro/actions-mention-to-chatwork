@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import axios from "axios";
 
-export const buildChatworkPostMessage = (
+export const buildChatworkPostMentionMessage = (
   chatworkIdsForMention: string[],
   issueTitle: string,
   commentLink: string,
@@ -18,6 +18,19 @@ export const buildChatworkPostMessage = (
   ].join(" ");
 
   return `${message}\n${body}`;
+};
+
+export const buildChatworkPostMessage = (
+  issueTitle: string,
+  commentLink: string,
+  githubBody: string,
+  senderName: string
+): string => {
+  const message = [
+    `commented at ${commentLink} ${issueTitle} by ${senderName}`,
+  ].join(" ");
+
+  return `${message}\n${githubBody}`;
 };
 
 export const buildChatworkErrorMessage = (
