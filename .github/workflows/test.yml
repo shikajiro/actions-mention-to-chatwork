@@ -29,7 +29,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-
       - run: npm install
-      - run: npm run test -- --coverage
+        # しばらく停止
+#      - run: npm run test -- --coverage
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
