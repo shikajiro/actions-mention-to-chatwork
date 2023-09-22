@@ -34,11 +34,11 @@ export const convertToChatworkUsername = (
   githubUsernames: string[],
   mapping: MappingFile
 ): Account[] => {
-  core.debug(JSON.stringify({ githubUsernames }, null, 2));
+  core.info(JSON.stringify({ githubUsernames }, null, 2));
   const slackIds = githubUsernames
     .map((githubUsername) => mapping[githubUsername]);
 
-  core.debug(JSON.stringify({ slackIds }, null, 2));
+  core.info(JSON.stringify({ slackIds }, null, 2));
 
   return slackIds;
 };
@@ -72,7 +72,7 @@ export const execArtifact = async (
 
   const slackIds = convertToChatworkUsername([reviewer], mapping);
   if (slackIds.length === 0) {
-    core.debug("finish execPrReviewRequestedMention because slackIds.length === 0");
+    core.info("finish execPrReviewRequestedMention because slackIds.length === 0");
     return;
   }
 
@@ -114,7 +114,7 @@ export const execPrReviewRequestedMention = async (
   const slackIds = convertToChatworkUsername([requestedGithubUsername], mapping);
 
   if (slackIds.length === 0) {
-    core.debug(
+    core.info(
       "finish execPrReviewRequestedMention because slackIds.length === 0"
     );
     return;
@@ -145,7 +145,7 @@ export const execNormalComment = async (
   const info = pickupInfoFromGithubPayload(payload);
 
   if (info.body === null) {
-    core.debug("finish execNormalMention because info.body === null");
+    core.info("finish execNormalMention because info.body === null");
     return;
   }
 
@@ -160,7 +160,7 @@ export const execNormalComment = async (
 
   const result = await chatworkClient.postToChatwork(allInputs.apiToken, account.room_id, message);
 
-  core.debug(
+  core.info(
       ["postToSlack result", JSON.stringify({result}, null, 2)].join("\n")
   );
 
@@ -175,20 +175,20 @@ export const execNormalMention = async (
   const info = pickupInfoFromGithubPayload(payload);
 
   if (info.body === null) {
-    core.debug("finish execNormalMention because info.body === null");
+    core.info("finish execNormalMention because info.body === null");
     return;
   }
 
   const githubUsernames = pickupUsername(info.body);
   if (githubUsernames.length === 0) {
-    core.debug("finish execNormalMention because githubUsernames.length === 0");
+    core.info("finish execNormalMention because githubUsernames.length === 0");
     return;
   }
 
   const slackIds = convertToChatworkUsername(githubUsernames, mapping);
 
   if (slackIds.length === 0) {
-    core.debug("finish execNormalMention because slackIds.length === 0");
+    core.info("finish execNormalMention because slackIds.length === 0");
     return;
   }
 
@@ -210,7 +210,7 @@ export const execNormalMention = async (
 
     const result = await chatworkClient.postToChatwork(apiToken, roomId, message);
 
-    core.debug(
+    core.info(
         ["postToSlack result", JSON.stringify({result}, null, 2)].join("\n")
     );
   }
@@ -235,7 +235,7 @@ export const execApproveMention = async (
   const slackIds = convertToChatworkUsername([prOwnerGithubUsername], mapping);
 
   if (slackIds.length === 0) {
-    core.debug("finish execApproveMention because slackIds.length === 0");
+    core.info("finish execApproveMention because slackIds.length === 0");
     return null;
   }
 
@@ -259,7 +259,7 @@ export const execApproveMention = async (
     message
   );
 
-  core.debug(
+  core.info(
     ["postToSlack result", JSON.stringify({ postSlackResult }, null, 2)].join(
       "\n"
     )
@@ -308,13 +308,13 @@ const getAllInputs = (): AllInputs => {
 };
 
 export const main = async (): Promise<void> => {
-  core.debug("start main()");
+  core.info("start main()");
 
   const { payload } = context;
-  core.debug(JSON.stringify({ payload }, null, 2));
+  core.info(JSON.stringify({ payload }, null, 2));
 
   const allInputs = getAllInputs();
-  core.debug(JSON.stringify({ allInputs }, null, 2));
+  core.info(JSON.stringify({ allInputs }, null, 2));
 
   const { repoToken, configurationPath, reviewRequest,  action } = allInputs;
 
@@ -333,7 +333,7 @@ export const main = async (): Promise<void> => {
       );
     })();
 
-    core.debug(JSON.stringify({ mapping }, null, 2));
+    core.info(JSON.stringify({ mapping }, null, 2));
 
     if(action === "artifact") {
       await execArtifact(
@@ -342,7 +342,7 @@ export const main = async (): Promise<void> => {
         mapping,
         ChatworkRepositoryImpl
       )
-      core.debug("finish execArtifact()");
+      core.info("finish execArtifact()");
       return;
     }
 
@@ -353,7 +353,7 @@ export const main = async (): Promise<void> => {
         mapping,
         ChatworkRepositoryImpl
       );
-      core.debug("finish execPrReviewRequestedMention()");
+      core.info("finish execPrReviewRequestedMention()");
       return;
     }
 
@@ -365,7 +365,7 @@ export const main = async (): Promise<void> => {
         ChatworkRepositoryImpl
       );
 
-      core.debug(
+      core.info(
         [
           "execApproveMention()",
           JSON.stringify({ sentSlackUserId }, null, 2),
@@ -381,7 +381,7 @@ export const main = async (): Promise<void> => {
           mapping,
           ChatworkRepositoryImpl,
       );
-      core.debug("finish execNormalMention()");
+      core.info("finish execNormalMention()");
       return;
     }
 
@@ -391,7 +391,7 @@ export const main = async (): Promise<void> => {
           mapping,
           ChatworkRepositoryImpl,
       );
-    core.debug("finish execNormalComment()");
+    core.info("finish execNormalComment()");
 
   } catch (error: any) {
     await execPostError(error, allInputs);
