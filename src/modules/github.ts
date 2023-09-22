@@ -149,17 +149,6 @@ export const pickupInfoFromGithubPayload = (
         senderName: payload.sender?.login || "",
       };
     }
-
-    if (!acceptActionTypes.pull_request.includes(action)) {
-      throw buildError(payload);
-    }
-
-    return {
-      body: payload.pull_request.body || "",
-      title: payload.pull_request.title,
-      url: payload.pull_request.html_url || "",
-      senderName: payload.sender?.login || "",
-    };
   }
 
   throw buildError(payload);

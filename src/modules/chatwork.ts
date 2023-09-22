@@ -9,15 +9,7 @@ export const buildChatworkPostMentionMessage = (
   senderName: string
 ): string => {
   const mentionBlock = chatworkIdsForMention.map((id) => `[To:${id}]`).join(" ");
-  const body = githubBody;
-
-  const message = [
-    mentionBlock,
-    `${chatworkIdsForMention.length === 1 ? "has" : "have"}`,
-    `been mentioned at ${commentLink} ${issueTitle} by ${senderName}`,
-  ].join(" ");
-
-  return `${message}\n${body}`;
+  return `${mentionBlock}\n[info][title]${senderName}がメンションしました[/title] ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
 };
 
 export const buildChatworkPostMessage = (
@@ -26,11 +18,7 @@ export const buildChatworkPostMessage = (
   githubBody: string,
   senderName: string
 ): string => {
-  const message = [
-    `commented at ${commentLink} ${issueTitle} by ${senderName}`,
-  ].join(" ");
-
-  return `${message}\n${githubBody}`;
+  return `[info][title]${senderName}がコメントしました[/title] ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
 };
 
 export const buildChatworkErrorMessage = (
