@@ -8,7 +8,7 @@ import {
   needToSendApproveMention, latestReviewer, needToMention,
 } from "./modules/github";
 import {
-  buildChatworkErrorMessage, buildChatworkPostMentionMessage,
+  buildChatworkErrorMessage, buildChatworkPostApproveMessage, buildChatworkPostMentionMessage,
   buildChatworkPostMessage,
   ChatworkRepositoryImpl,
 } from "./modules/chatwork";
@@ -209,21 +209,23 @@ export const execApproveMention = async (
   }
 
   const info = pickupInfoFromGithubPayload(payload);
-  const approveOwner = payload.sender?.login;
-  const message = [
-    `[To:${account.account_id}] (cracker) has been approved ${info.url} ${info.title} by ${approveOwner}.`,
-    info.body || "",
-  ].join("\n");
+  const message = buildChatworkPostApproveMessage(
+      [account.account_id],
+        info.title,
+        info.url,
+        info.body,
+        payload.sender?.login
+  )
   const { apiToken} = allInputs;
 
-  const postSlackResult = await chatworkClient.postToChatwork(
+  const postResult = await chatworkClient.postToChatwork(
     apiToken,
     account.room_id,
     message
   );
 
   core.info(
-    ["postToSlack result", JSON.stringify({ postSlackResult }, null, 2)].join(
+    ["postToSlack result", JSON.stringify({ postSlackResult: postResult }, null, 2)].join(
       "\n"
     )
   );

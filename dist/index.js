@@ -1687,14 +1687,10 @@ const execApproveMention = async (payload, allInputs, mapping, chatworkClient) =
         throw new Error("Can not find room ID.");
     }
     const info = (0, github_2.pickupInfoFromGithubPayload)(payload);
-    const approveOwner = (_c = payload.sender) === null || _c === void 0 ? void 0 : _c.login;
-    const message = [
-        `[To:${account.account_id}] (cracker) has been approved ${info.url} ${info.title} by ${approveOwner}.`,
-        info.body || "",
-    ].join("\n");
+    const message = (0, chatwork_1.buildChatworkPostApproveMessage)([account.account_id], info.title, info.url, info.body, (_c = payload.sender) === null || _c === void 0 ? void 0 : _c.login);
     const { apiToken } = allInputs;
-    const postSlackResult = await chatworkClient.postToChatwork(apiToken, account.room_id, message);
-    core.info(["postToSlack result", JSON.stringify({ postSlackResult }, null, 2)].join("\n"));
+    const postResult = await chatworkClient.postToChatwork(apiToken, account.room_id, message);
+    core.info(["postToSlack result", JSON.stringify({ postSlackResult: postResult }, null, 2)].join("\n"));
     return account.account_id;
 };
 exports.execApproveMention = execApproveMention;
@@ -4841,7 +4837,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ChatworkRepositoryImpl = exports.buildChatworkErrorMessage = exports.buildChatworkPostMessage = exports.buildChatworkPostMentionMessage = void 0;
+exports.ChatworkRepositoryImpl = exports.buildChatworkErrorMessage = exports.buildChatworkPostMessage = exports.buildChatworkPostApproveMessage = exports.buildChatworkPostMentionMessage = void 0;
 const core = __importStar(__webpack_require__(470));
 const axios_1 = __importDefault(__webpack_require__(53));
 const buildChatworkPostMentionMessage = (chatworkIdsForMention, issueTitle, commentLink, githubBody, senderName) => {
@@ -4849,6 +4845,11 @@ const buildChatworkPostMentionMessage = (chatworkIdsForMention, issueTitle, comm
     return `${mentionBlock}\n[info][title]${senderName}がメンションしました[/title] ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
 };
 exports.buildChatworkPostMentionMessage = buildChatworkPostMentionMessage;
+const buildChatworkPostApproveMessage = (chatworkIdsForMention, issueTitle, commentLink, githubBody, senderName) => {
+    const mentionBlock = chatworkIdsForMention.map((id) => `[To:${id}]`).join(" ");
+    return `${mentionBlock}\n[info][title](cracker)${senderName}が承認しました[/title] ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
+};
+exports.buildChatworkPostApproveMessage = buildChatworkPostApproveMessage;
 const buildChatworkPostMessage = (issueTitle, commentLink, githubBody, senderName) => {
     return `[info][title]${senderName}がコメントしました[/title] ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
 };

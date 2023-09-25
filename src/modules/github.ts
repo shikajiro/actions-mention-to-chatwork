@@ -86,7 +86,7 @@ export const latestReviewer = async (repoName: string, prNumber: number, repoTok
 export const pickupInfoFromGithubPayload = (
   payload: WebhookPayload
 ): {
-  body: string | null;
+  body: string;
   title: string;
   url: string;
   senderName: string;
