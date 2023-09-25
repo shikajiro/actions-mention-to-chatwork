@@ -80,7 +80,6 @@ export const latestReviewer = async (repoName: string, prNumber: number, repoTok
   );
   core.info(`requested_reviewers result: ${result}`);
   core.info(`requested_reviewers data: ${result.data}`);
-  core.info(`requested_reviewers users: ${result.data.users}`);
   if(result.data.users.length == 0) return null;
 
   return result.data.users.map((user) => user.login);
