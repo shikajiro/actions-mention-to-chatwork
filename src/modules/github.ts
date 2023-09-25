@@ -78,8 +78,6 @@ export const latestReviewer = async (repoName: string, prNumber: number, repoTok
       headers: { "authorization": `Bearer ${repoToken}` },
     }
   );
-  core.info(`requested_reviewers result: ${result}`);
-  core.info(`requested_reviewers data: ${result.data}`);
   if(result.data.users.length == 0) return null;
 
   return result.data.users.map((user) => user.login);

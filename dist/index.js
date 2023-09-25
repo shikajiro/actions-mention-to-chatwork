@@ -1719,15 +1719,13 @@ const getAllInputs = () => {
     }
     const apiToken = core.getInput("api-token", { required: true });
     const runId = core.getInput("run-id", { required: false });
-    const reviewRequest = core.getInput("review-request", { required: true });
-    const action = core.getInput("action", { required: false });
+    const reviewRequest = core.getBooleanInput("review-request", { required: true });
     return {
         repoToken,
         configurationPath,
         apiToken,
         runId,
         reviewRequest,
-        action,
     };
 };
 const main = async () => {
@@ -12765,8 +12763,6 @@ const latestReviewer = async (repoName, prNumber, repoToken) => {
     const result = await axios_1.default.get(`https://api.github.com/repos/${repoName}/pulls/${prNumber}/requested_reviewers`, {
         headers: { "authorization": `Bearer ${repoToken}` },
     });
-    core.info(`requested_reviewers result: ${result}`);
-    core.info(`requested_reviewers data: ${result.data}`);
     if (result.data.users.length == 0)
         return null;
     return result.data.users.map((user) => user.login);
