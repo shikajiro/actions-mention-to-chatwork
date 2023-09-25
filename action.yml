@@ -20,6 +20,7 @@ inputs:
     default: "true"
   action:
     description: "Action name."
+    deprecationMessage: "not use."
     required: false
 runs:
   using: "node16"

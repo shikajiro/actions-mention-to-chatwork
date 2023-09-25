@@ -43,7 +43,7 @@ export const convertToChatworkUsername = (
   return slackIds;
 };
 
-export const execArtifact = async (
+export const execPrReviewRequestedMention = async (
   payload: WebhookPayload,
   allInputs: AllInputs,
   mapping: MappingFile,
@@ -59,81 +59,45 @@ export const execArtifact = async (
     throw new Error("Can not find pull request number.");
   }
 
-  const reviewer = await latestReviewer(name, number, allInputs.repoToken)
-  if (reviewer === null) {
+  const reviewers = await latestReviewer(name, number, allInputs.repoToken)
+  if (reviewers === null || reviewers.length == 0) {
     throw new Error("Can not find review requested user.");
   }
-  core.info(`reviewer ${ reviewer }`);
+  core.info(`reviewers ${ reviewers }`);
 
   core.info(`labels ${ payload.pull_request?.labels[0]?.name}`);
   const labels = payload.pull_request?.labels
       ?.map((label:any) => label.name)
       ?.filter((name:any) => name === 'hurry' || name === '2days' || name === '2weeks') as string[];
 
-  const slackIds = convertToChatworkUsername([reviewer], mapping);
+  const slackIds = convertToChatworkUsername(reviewers, mapping);
   if (slackIds.length === 0) {
     core.info("finish execPrReviewRequestedMention because slackIds.length === 0");
     return;
   }
 
-  const account = slackIds[0];
-  const roomId = account.room_id;
-  if (roomId === undefined) {
-    throw new Error("Can not find room ID.");
+  for (const account of slackIds) {
+      const roomId = account.room_id;
+      if (roomId === undefined) {
+        throw new Error("Can not find room ID.");
+      }
+
+      const requestUsername = payload.sender?.login;
+      const prUrl = payload.pull_request?.html_url;
+      const prTitle = payload.pull_request?.title;
+
+
+      const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prTitle} ${prUrl} by ${requestUsername}.`;
+      const { apiToken } = allInputs;
+
+      const exist = await chatworkClient.existChatworkTask(apiToken, roomId, account.account_id, message);
+      if (exist) {
+        core.info(`already exist ${message}`);
+        return;
+      }
+
+      await chatworkClient.createChatworkTask(apiToken, account.room_id, account.account_id, message, labels);
   }
-
-  const requestUsername = payload.sender?.login;
-  const prUrl = payload.pull_request?.html_url;
-  const prTitle = payload.pull_request?.title;
-
-  const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prTitle} ${prUrl} by ${requestUsername}.`;
-  const { apiToken } = allInputs;
-
-  const exist = await chatworkClient.existChatworkTask(apiToken, roomId, account.account_id, message);
-  if (exist) {
-    core.info(`already exist ${message}`);
-    return;
-  }
-
-  await chatworkClient.createChatworkTask(apiToken, account.room_id, account.account_id, message, labels);
-};
-
-export const execPrReviewRequestedMention = async (
-  payload: WebhookPayload,
-  allInputs: AllInputs,
-  mapping: MappingFile,
-  chatworkClient: Pick<typeof ChatworkRepositoryImpl, "postToChatwork">
-): Promise<void> => {
-  const requestedGithubUsername =
-    payload.requested_reviewer?.login || payload.requested_team?.name;
-
-  if (!requestedGithubUsername) {
-    throw new Error("Can not find review requested user.");
-  }
-
-  const slackIds = convertToChatworkUsername([requestedGithubUsername], mapping);
-
-  if (slackIds.length === 0) {
-    core.info(
-      "finish execPrReviewRequestedMention because slackIds.length === 0"
-    );
-    return;
-  }
-
-  const account = slackIds[0];
-  const roomId = account.room_id;
-  if (roomId === undefined) {
-    throw new Error("Can not find room ID.");
-  }
-
-  const title = payload.pull_request?.title;
-  const url = payload.pull_request?.html_url;
-  const requestUsername = payload.sender?.login;
-
-  const message = `[To:${account.account_id}] has been requested to review ${url} ${title} by ${requestUsername}.`;
-  const { apiToken } = allInputs;
-
-  await chatworkClient.postToChatwork(apiToken, roomId, message);
 };
 
 export const execNormalComment = async (
@@ -316,7 +280,7 @@ export const main = async (): Promise<void> => {
   const allInputs = getAllInputs();
   core.info(JSON.stringify({ allInputs }, null, 2));
 
-  const { repoToken, configurationPath, reviewRequest,  action } = allInputs;
+  const { repoToken, configurationPath, reviewRequest } = allInputs;
 
   try {
     const mapping = await (async () => {
@@ -332,21 +296,9 @@ export const main = async (): Promise<void> => {
         context.sha
       );
     })();
-
     core.info(JSON.stringify({ mapping }, null, 2));
 
-    if(action === "artifact") {
-      await execArtifact(
-        payload,
-        allInputs,
-        mapping,
-        ChatworkRepositoryImpl
-      )
-      core.info("finish execArtifact()");
-      return;
-    }
-
-    if (reviewRequest && payload.action === "review_requested") {
+    if (reviewRequest) {
       await execPrReviewRequestedMention(
         payload,
         allInputs,
