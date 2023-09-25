@@ -12,6 +12,17 @@ export const buildChatworkPostMentionMessage = (
   return `${mentionBlock}\n[info][title]${senderName}がメンションしました[/title] ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
 };
 
+export const buildChatworkPostApproveMessage = (
+  chatworkIdsForMention: string[],
+  issueTitle: string,
+  commentLink: string,
+  githubBody: string,
+  senderName: string
+): string => {
+  const mentionBlock = chatworkIdsForMention.map((id) => `[To:${id}]`).join(" ");
+  return `${mentionBlock}\n[info][title](cracker)${senderName}が承認しました[/title] ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
+};
+
 export const buildChatworkPostMessage = (
   issueTitle: string,
   commentLink: string,
