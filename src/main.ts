@@ -23,8 +23,7 @@ export type AllInputs = {
   configurationPath: string;
   apiToken: string;
   runId?: string;
-  reviewRequest?: string;
-  action?: string;
+  reviewRequest?: boolean;
 };
 
 export const arrayDiff = <T>(arr1: T[], arr2: T[]) =>
@@ -258,8 +257,7 @@ const getAllInputs = (): AllInputs => {
   }
   const apiToken = core.getInput("api-token", { required: true });
   const runId = core.getInput("run-id", { required: false });
-  const reviewRequest = core.getInput("review-request", { required: true });
-  const action = core.getInput("action", { required: false });
+  const reviewRequest = core.getBooleanInput("review-request", { required: true });
 
   return {
     repoToken,
@@ -267,7 +265,6 @@ const getAllInputs = (): AllInputs => {
     apiToken,
     runId,
     reviewRequest,
-    action,
   };
 };
 
