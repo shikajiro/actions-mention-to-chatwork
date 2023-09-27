@@ -1588,6 +1588,7 @@ const convertToChatworkUsername = (githubUsernames, mapping) => {
 exports.convertToChatworkUsername = convertToChatworkUsername;
 const execPrReviewRequestedMention = async (payload, allInputs, mapping, chatworkClient) => {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    core.info("start execPrReviewRequestedMention()");
     const name = (_a = payload.repository) === null || _a === void 0 ? void 0 : _a.full_name;
     if (name === undefined) {
         throw new Error("Can not find repository name.");
@@ -1628,6 +1629,7 @@ const execPrReviewRequestedMention = async (payload, allInputs, mapping, chatwor
 };
 exports.execPrReviewRequestedMention = execPrReviewRequestedMention;
 const execNormalComment = async (payload, allInputs, mapping, chatworkClient) => {
+    core.info("start execNormalComment()");
     const info = (0, github_2.pickupInfoFromGithubPayload)(payload);
     if (info.body === null) {
         core.info("finish execNormalMention because info.body === null");
@@ -1640,6 +1642,7 @@ const execNormalComment = async (payload, allInputs, mapping, chatworkClient) =>
 };
 exports.execNormalComment = execNormalComment;
 const execNormalMention = async (payload, allInputs, mapping, chatworkClient) => {
+    core.info("start execNormalMention()");
     const info = (0, github_2.pickupInfoFromGithubPayload)(payload);
     if (info.body === null) {
         core.info("finish execNormalMention because info.body === null");
@@ -1669,6 +1672,7 @@ const execNormalMention = async (payload, allInputs, mapping, chatworkClient) =>
 exports.execNormalMention = execNormalMention;
 const execApproveMention = async (payload, allInputs, mapping, chatworkClient) => {
     var _a, _b, _c;
+    core.info("start execApproveMention()");
     if (!(0, github_2.needToSendApproveMention)(payload)) {
         throw new Error("failed to parse payload");
     }

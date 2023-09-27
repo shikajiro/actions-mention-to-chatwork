@@ -48,6 +48,8 @@ export const execPrReviewRequestedMention = async (
   mapping: MappingFile,
   chatworkClient: Pick<typeof ChatworkRepositoryImpl, "existChatworkTask" | "createChatworkTask">
 ): Promise<void> => {
+  core.info("start execPrReviewRequestedMention()");
+
   const name = payload.repository?.full_name;
   if (name === undefined) {
     throw new Error("Can not find repository name.");
@@ -105,6 +107,8 @@ export const execNormalComment = async (
   mapping: MappingFile,
   chatworkClient: Pick<typeof ChatworkRepositoryImpl, "postToChatwork">
 ): Promise<void> => {
+  core.info("start execNormalComment()");
+
   const info = pickupInfoFromGithubPayload(payload);
 
   if (info.body === null) {
@@ -135,6 +139,8 @@ export const execNormalMention = async (
   mapping: MappingFile,
   chatworkClient: Pick<typeof ChatworkRepositoryImpl, "postToChatwork">
 ): Promise<void> => {
+  core.info("start execNormalMention()");
+
   const info = pickupInfoFromGithubPayload(payload);
 
   if (info.body === null) {
@@ -185,6 +191,8 @@ export const execApproveMention = async (
   mapping: MappingFile,
   chatworkClient: Pick<typeof ChatworkRepositoryImpl, "postToChatwork">
 ): Promise<string | null> => {
+  core.info("start execApproveMention()");
+
   if (!needToSendApproveMention(payload)) {
     throw new Error("failed to parse payload");
   }
