@@ -9,7 +9,7 @@ export const buildChatworkPostMentionMessage = (
   senderName: string
 ): string => {
   const mentionBlock = chatworkIdsForMention.map((id) => `[To:${id}]`).join(" ");
-  return `${mentionBlock}\n[info][title]${senderName}がメンションしました[/title] ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
+  return `[info][title]${senderName}がメンションしました[/title]${mentionBlock} ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
 };
 
 export const buildChatworkPostApproveMessage = (
@@ -20,7 +20,7 @@ export const buildChatworkPostApproveMessage = (
   senderName: string
 ): string => {
   const mentionBlock = chatworkIdsForMention.map((id) => `[To:${id}]`).join(" ");
-  return `${mentionBlock}\n[info][title](cracker)${senderName}が承認しました[/title] ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
+  return `[info][title](cracker)${senderName}が承認しました[/title]${mentionBlock} ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
 };
 
 export const buildChatworkPostMessage = (
