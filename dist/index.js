@@ -4846,12 +4846,12 @@ const core = __importStar(__webpack_require__(470));
 const axios_1 = __importDefault(__webpack_require__(53));
 const buildChatworkPostMentionMessage = (chatworkIdsForMention, issueTitle, commentLink, githubBody, senderName) => {
     const mentionBlock = chatworkIdsForMention.map((id) => `[To:${id}]`).join(" ");
-    return `${mentionBlock}\n[info][title]${senderName}がメンションしました[/title] ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
+    return `[info][title]${senderName}がメンションしました[/title]${mentionBlock} ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
 };
 exports.buildChatworkPostMentionMessage = buildChatworkPostMentionMessage;
 const buildChatworkPostApproveMessage = (chatworkIdsForMention, issueTitle, commentLink, githubBody, senderName) => {
     const mentionBlock = chatworkIdsForMention.map((id) => `[To:${id}]`).join(" ");
-    return `${mentionBlock}\n[info][title](cracker)${senderName}が承認しました[/title] ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
+    return `[info][title](cracker)${senderName}が承認しました[/title]${mentionBlock} ${issueTitle}\n${commentLink}\n[hr]\n${githubBody}\n[/info]`;
 };
 exports.buildChatworkPostApproveMessage = buildChatworkPostApproveMessage;
 const buildChatworkPostMessage = (issueTitle, commentLink, githubBody, senderName) => {
