@@ -1,10 +1,9 @@
-import {
-  pickupUsername,
-  pickupInfoFromGithubPayload,
-} from "../../src/modules/github";
-
 import { realPayload } from "../fixture/real-payload-20211017";
 import { prApprovePayload } from "../fixture/real-payload-20211024-pr-approve";
+import {
+  pickupInfoFromGithubPayload,
+  pickupUsername,
+} from "../../src/domain/github";
 
 describe("modules/github", () => {
   describe("pickupUsername", () => {
@@ -183,6 +182,9 @@ describe("modules/github", () => {
             title: "pr title",
             html_url: "pr url",
           },
+          comment: {
+            body: "comment body",
+          },
           sender: {
             login: "sender_github_username",
           },
@@ -190,13 +192,12 @@ describe("modules/github", () => {
       };
 
       it("should return when pr opend", () => {
-        const dummyPayload = buildPrPayload("opened");
+        const dummyPayload = buildPrPayload("created");
         const result = pickupInfoFromGithubPayload(dummyPayload as any);
 
         expect(result).toEqual({
-          body: "pr body",
+          body: "comment body",
           title: "pr title",
-          url: "pr url",
           senderName: "sender_github_username",
         });
       });
@@ -206,9 +207,8 @@ describe("modules/github", () => {
         const result = pickupInfoFromGithubPayload(dummyPayload as any);
 
         expect(result).toEqual({
-          body: "pr body",
+          body: "comment body",
           title: "pr title",
-          url: "pr url",
           senderName: "sender_github_username",
         });
       });
