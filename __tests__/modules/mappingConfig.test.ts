@@ -3,13 +3,13 @@ import axios from "axios";
 import {
   isUrl,
   MappingConfigRepositoryImpl,
-} from "../../src/modules/mappingConfig";
+} from "../../src/repository/mappingConfig";
 
 describe("mappingConfig", () => {
   describe("isUrl", () => {
     it("true https://github.com/abeyuya/actions-mention-to-slack", () => {
       const result = isUrl(
-        "https://github.com/abeyuya/actions-mention-to-slack"
+        "https://github.com/abeyuya/actions-mention-to-slack",
       );
       expect(result).toEqual(true);
     });
@@ -28,7 +28,7 @@ describe("mappingConfig", () => {
           .mockResolvedValueOnce({ data: 'github_user_id: "XXXXXXX"' });
 
         const result = await MappingConfigRepositoryImpl.loadFromUrl(
-          "https://example.com"
+          "https://example.com",
         );
 
         expect(spy).toHaveBeenCalledTimes(1);
