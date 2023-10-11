@@ -26,7 +26,7 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "ncc build --source-map",
+    "build": "ncc build src/index.ts",
     "lint": "tsc --noEmit && eslint --ext .js,.ts ./"
   },
   "repository": {
