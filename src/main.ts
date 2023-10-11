@@ -1,5 +1,3 @@
-import { stringify } from "ts-jest";
-
 import * as core from "@actions/core";
 import { context } from "@actions/github";
 
@@ -18,16 +16,16 @@ export const main = async (): Promise<void> => {
   core.info("start main");
 
   const { payload } = context;
-  core.info(stringify(payload));
+  core.info(JSON.stringify(payload));
 
   const allInputs = getAllInputs();
-  core.info(stringify(allInputs));
+  core.info(JSON.stringify(allInputs));
 
   const { repoToken, configurationPath, reviewRequest } = allInputs;
 
   try {
     const mapping = await execLoadMapping(configurationPath, repoToken);
-    core.info(stringify(mapping));
+    core.info(JSON.stringify(mapping));
 
     if (reviewRequest) {
       await execPrReviewRequestedMention(payload, allInputs, mapping);

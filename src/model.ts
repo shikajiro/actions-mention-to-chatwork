@@ -1,5 +1,4 @@
 import * as core from "@actions/core";
-import { stringify } from "ts-jest";
 
 export type AllInputs = {
   repoToken: string;
@@ -45,12 +44,12 @@ export const convertToChatworkUsername = (
   githubUsernames: string[],
   mapping: MappingFile,
 ): Account[] => {
-  core.info(stringify(githubUsernames));
+  core.info(JSON.stringify(githubUsernames));
 
   const slackIds = githubUsernames.map(
     (githubUsername) => mapping[githubUsername],
   );
-  core.info(stringify(slackIds));
+  core.info(JSON.stringify(slackIds));
 
   return slackIds;
 };

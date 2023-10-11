@@ -32,9 +32,12 @@ jobs:
         run: |
           npm install
           npm run build
+          mkdir act
+          cp -r dist act
+          cp action.yml act
 
       - name: test run
-        uses: ./
+        uses: ./act
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           api-token: ${{ secrets.CHATWORK_API_TOKEN }}
