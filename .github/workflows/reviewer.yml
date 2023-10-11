@@ -1,18 +1,11 @@
-name: Mention To Chatwork Comment Test
+name: Pull Request Review
 
 on:
-  # PRにコメントした時
-  issue_comment:
-    types: [ created, edited ]
-  # approve したとき
-  pull_request_review:
-    types: [ submitted ]
-  # レビューとしてコメントを投稿・編集したとき
-  pull_request_review_comment:
-    types: [ created, edited ]
+  pull_request:
+    types: [ review_requested ]
 
 jobs:
-  mention-to-chatwork:
+  notify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -40,4 +33,3 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           api-token: ${{ secrets.CHATWORK_API_TOKEN }}
           run-id: ${{ github.run_id }}
-          review-request: false
