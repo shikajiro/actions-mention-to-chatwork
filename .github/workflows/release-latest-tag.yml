@@ -3,7 +3,7 @@ name: Release latest tag
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   push-latest-tag:
