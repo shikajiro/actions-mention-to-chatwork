@@ -1,5 +1,4 @@
 import { context } from "@actions/github";
-import { stringify } from "ts-jest";
 import { WebhookPayload } from "@actions/github/lib/interfaces";
 import { convertToChatworkUsername, MappingFile } from "../model";
 import * as core from "@actions/core";
@@ -31,7 +30,7 @@ const acceptActionTypes = {
 };
 
 const buildError = (payload: unknown): Error => {
-  return new Error(`unknown event hook: ${stringify(payload)}`);
+  return new Error(`unknown event hook: ${JSON.stringify(payload)}`);
 };
 
 export const needToSendApproveMention = (payload: WebhookPayload): boolean => {
