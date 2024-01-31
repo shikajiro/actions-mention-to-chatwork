@@ -33,6 +33,14 @@ const buildError = (payload: unknown): Error => {
   return new Error(`unknown event hook: ${JSON.stringify(payload)}`);
 };
 
+export const needToReviewRequest = (payload: WebhookPayload): boolean => {
+  if (payload.pull_request?.draft === true) {
+    return false;
+  }
+
+  return true;
+};
+
 export const needToSendApproveMention = (payload: WebhookPayload): boolean => {
   if (payload.review?.state === "approved") {
     return true;

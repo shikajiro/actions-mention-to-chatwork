@@ -1586,7 +1586,7 @@ const main = async () => {
     try {
         const mapping = await (0, usecase_1.execLoadMapping)(configurationPath, repoToken);
         core.info(JSON.stringify(mapping));
-        if (reviewRequest) {
+        if (reviewRequest && (0, github_2.needToReviewRequest)(payload)) {
             await (0, usecase_1.execPrReviewRequestedMention)(payload, allInputs, mapping);
             core.info("finish execPrReviewRequestedMention()");
         }
@@ -6258,7 +6258,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.pickupInfoFromGithubPayload = exports.needToMention = exports.needToSendApproveMention = exports.pickupUsername = exports.buildCurrentJobUrl = void 0;
+exports.pickupInfoFromGithubPayload = exports.needToMention = exports.needToSendApproveMention = exports.needToReviewRequest = exports.pickupUsername = exports.buildCurrentJobUrl = void 0;
 const github_1 = __webpack_require__(469);
 const model_1 = __webpack_require__(931);
 const core = __importStar(__webpack_require__(470));
@@ -6287,6 +6287,14 @@ const acceptActionTypes = {
 const buildError = (payload) => {
     return new Error(`unknown event hook: ${JSON.stringify(payload)}`);
 };
+const needToReviewRequest = (payload) => {
+    var _a;
+    if (((_a = payload.pull_request) === null || _a === void 0 ? void 0 : _a.draft) === true) {
+        return false;
+    }
+    return true;
+};
+exports.needToReviewRequest = needToReviewRequest;
 const needToSendApproveMention = (payload) => {
     var _a;
     if (((_a = payload.review) === null || _a === void 0 ? void 0 : _a.state) === "approved") {
