@@ -10,7 +10,11 @@ import {
   postError,
 } from "./usecase";
 import { getAllInputs } from "./model";
-import { needToMention, needToSendApproveMention } from "./domain/github";
+import {
+  needToMention,
+  needToReviewRequest,
+  needToSendApproveMention,
+} from "./domain/github";
 
 export const main = async (): Promise<void> => {
   core.info("start main");
@@ -27,7 +31,7 @@ export const main = async (): Promise<void> => {
     const mapping = await execLoadMapping(configurationPath, repoToken);
     core.info(JSON.stringify(mapping));
 
-    if (reviewRequest) {
+    if (reviewRequest && needToReviewRequest(payload)) {
       await execPrReviewRequestedMention(payload, allInputs, mapping);
       core.info("finish execPrReviewRequestedMention()");
     } else if (needToSendApproveMention(payload)) {
