@@ -32,41 +32,16 @@ export const ChatworkRepositoryImpl = {
     roomId: string,
     accountId: string,
     message: string,
-    labels: string[],
   ): Promise<ChatworkPostResult> => {
-    const isHurry = labels.find((label) => label === "hurry");
-    const is2days = labels.find((label) => label === "2days");
-    let limit = 0;
     const now = new Date();
-    if (isHurry !== undefined) {
-      limit = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        23,
-        59,
-        59,
-      ).getTime();
-    } else if (is2days !== undefined) {
-      limit = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() + 2,
-        23,
-        59,
-        59,
-      ).getTime();
-    } else {
-      // is2weeks or default
-      limit = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() + 14,
-        23,
-        59,
-        59,
-      ).getTime();
-    }
+    const limit = Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + 14,
+      23,
+      59,
+      59
+    );
     const encodedParams = new URLSearchParams();
     encodedParams.set("body", message);
     encodedParams.set("to_ids", accountId);

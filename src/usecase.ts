@@ -44,11 +44,6 @@ export const execPrReviewRequestedMention = async (
   }
   core.info(`reviewers ${reviewers}`);
 
-  core.info(`labels ${payload.pull_request?.labels[0]?.name}`);
-  const labels = payload.pull_request?.labels?.map(
-    (label: any) => label.name,
-  ) as string[];
-
   const slackIds = convertToChatworkUsername(reviewers, mapping);
   if (slackIds.length === 0) {
     core.info(
@@ -87,7 +82,6 @@ export const execPrReviewRequestedMention = async (
       account.room_id,
       account.account_id,
       message,
-      labels,
     );
   }
 };
