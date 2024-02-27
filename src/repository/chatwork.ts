@@ -33,16 +33,15 @@ export const ChatworkRepositoryImpl = {
     accountId: string,
     message: string,
   ): Promise<ChatworkPostResult> => {
-    let limit = 0;
     const now = new Date();
-    limit = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() + 14,
+    const limit = Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + 14,
       23,
       59,
-      59,
-    ).getTime();
+      59
+    );
     const encodedParams = new URLSearchParams();
     encodedParams.set("body", message);
     encodedParams.set("to_ids", accountId);
