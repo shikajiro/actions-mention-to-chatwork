@@ -15907,7 +15907,7 @@ const github_3 = __webpack_require__(427);
  * レビュー依頼があった際にタスクを作成する
  */
 const execPrReviewRequestedMention = async (payload, allInputs, mapping) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    var _a, _b, _c, _d, _e;
     core.info("start execPrReviewRequestedMention()");
     const name = (_a = payload.repository) === null || _a === void 0 ? void 0 : _a.full_name;
     if (name === undefined) {
@@ -15922,8 +15922,6 @@ const execPrReviewRequestedMention = async (payload, allInputs, mapping) => {
         throw new Error("Can not find review requested user.");
     }
     core.info(`reviewers ${reviewers}`);
-    core.info(`labels ${(_d = (_c = payload.pull_request) === null || _c === void 0 ? void 0 : _c.labels[0]) === null || _d === void 0 ? void 0 : _d.name}`);
-    const labels = (_f = (_e = payload.pull_request) === null || _e === void 0 ? void 0 : _e.labels) === null || _f === void 0 ? void 0 : _f.map((label) => label.name);
     const slackIds = (0, model_1.convertToChatworkUsername)(reviewers, mapping);
     if (slackIds.length === 0) {
         core.info("finish execPrReviewRequestedMention because slackIds.length === 0");
@@ -15934,9 +15932,9 @@ const execPrReviewRequestedMention = async (payload, allInputs, mapping) => {
         if (roomId === undefined) {
             throw new Error("Can not find room ID.");
         }
-        const requestUsername = (_g = payload.sender) === null || _g === void 0 ? void 0 : _g.login;
-        const prUrl = (_h = payload.pull_request) === null || _h === void 0 ? void 0 : _h.html_url;
-        const prTitle = (_j = payload.pull_request) === null || _j === void 0 ? void 0 : _j.title;
+        const requestUsername = (_c = payload.sender) === null || _c === void 0 ? void 0 : _c.login;
+        const prUrl = (_d = payload.pull_request) === null || _d === void 0 ? void 0 : _d.html_url;
+        const prTitle = (_e = payload.pull_request) === null || _e === void 0 ? void 0 : _e.title;
         const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prTitle} ${prUrl} by ${requestUsername}.`;
         const { apiToken } = allInputs;
         const exist = await chatwork_1.ChatworkRepositoryImpl.existChatworkTask(apiToken, roomId, account.account_id, message);
@@ -15944,7 +15942,7 @@ const execPrReviewRequestedMention = async (payload, allInputs, mapping) => {
             core.info(`already exist ${message}`);
             return;
         }
-        await chatwork_1.ChatworkRepositoryImpl.createChatworkTask(apiToken, account.room_id, account.account_id, message, labels);
+        await chatwork_1.ChatworkRepositoryImpl.createChatworkTask(apiToken, account.room_id, account.account_id, message);
     }
 };
 exports.execPrReviewRequestedMention = execPrReviewRequestedMention;
@@ -16240,21 +16238,9 @@ exports.ChatworkRepositoryImpl = {
         });
         return result.data;
     },
-    createChatworkTask: async (apiToken, roomId, accountId, message, labels) => {
-        const isHurry = labels.find((label) => label === "hurry");
-        const is2days = labels.find((label) => label === "2days");
-        let limit = 0;
+    createChatworkTask: async (apiToken, roomId, accountId, message) => {
         const now = new Date();
-        if (isHurry !== undefined) {
-            limit = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).getTime();
-        }
-        else if (is2days !== undefined) {
-            limit = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2, 23, 59, 59).getTime();
-        }
-        else {
-            // is2weeks or default
-            limit = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 14, 23, 59, 59).getTime();
-        }
+        const limit = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 14, 23, 59, 59);
         const encodedParams = new URLSearchParams();
         encodedParams.set("body", message);
         encodedParams.set("to_ids", accountId);
