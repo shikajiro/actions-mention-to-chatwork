@@ -33,7 +33,7 @@ export const execPrReviewRequestedMention = async (
     throw new Error("Can not find repository name.");
   }
 
-  const number = payload.pull_request?.number;
+  const number = payload.pull_request?.number || payload.inputs?.pr_number?.toNumber();
   if (number === undefined) {
     throw new Error("Can not find pull request number.");
   }
