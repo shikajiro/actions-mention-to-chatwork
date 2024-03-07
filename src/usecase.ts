@@ -27,16 +27,13 @@ export const execPrReviewRequestedMention = async (
   mapping: MappingFile,
 ): Promise<void> => {
   core.info("start execPrReviewRequestedMention()");
-  core.info(`payload ${payload}`);
-  core.info(`inputs ${payload?.inputs}`);
-  core.info(`pr_number ${payload.inputs?.pr_number}`);
 
   const name = payload.repository?.full_name;
   if (name === undefined) {
     throw new Error("Can not find repository name.");
   }
 
-  const number = payload.pull_request?.number || payload.inputs?.pr_number?.toNumber();
+  const number = payload.pull_request?.number || Number(payload.inputs?.pr_number);
   if (number === undefined) {
     throw new Error("Can not find pull request number.");
   }
