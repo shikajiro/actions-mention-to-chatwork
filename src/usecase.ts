@@ -27,6 +27,9 @@ export const execPrReviewRequestedMention = async (
   mapping: MappingFile,
 ): Promise<void> => {
   core.info("start execPrReviewRequestedMention()");
+  core.info(`payload ${payload}`);
+  core.info(`inputs ${payload?.inputs}`);
+  core.info(`pr_number ${payload.inputs?.pr_number}`);
 
   const name = payload.repository?.full_name;
   if (name === undefined) {
