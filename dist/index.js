@@ -15907,13 +15907,13 @@ const github_3 = __webpack_require__(427);
  * レビュー依頼があった際にタスクを作成する
  */
 const execPrReviewRequestedMention = async (payload, allInputs, mapping) => {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f, _g;
     core.info("start execPrReviewRequestedMention()");
     const name = (_a = payload.repository) === null || _a === void 0 ? void 0 : _a.full_name;
     if (name === undefined) {
         throw new Error("Can not find repository name.");
     }
-    const number = (_b = payload.pull_request) === null || _b === void 0 ? void 0 : _b.number;
+    const number = ((_b = payload.pull_request) === null || _b === void 0 ? void 0 : _b.number) || ((_d = (_c = payload.inputs) === null || _c === void 0 ? void 0 : _c.pr_number) === null || _d === void 0 ? void 0 : _d.toNumber());
     if (number === undefined) {
         throw new Error("Can not find pull request number.");
     }
@@ -15932,9 +15932,9 @@ const execPrReviewRequestedMention = async (payload, allInputs, mapping) => {
         if (roomId === undefined) {
             throw new Error("Can not find room ID.");
         }
-        const requestUsername = (_c = payload.sender) === null || _c === void 0 ? void 0 : _c.login;
-        const prUrl = (_d = payload.pull_request) === null || _d === void 0 ? void 0 : _d.html_url;
-        const prTitle = (_e = payload.pull_request) === null || _e === void 0 ? void 0 : _e.title;
+        const requestUsername = (_e = payload.sender) === null || _e === void 0 ? void 0 : _e.login;
+        const prUrl = (_f = payload.pull_request) === null || _f === void 0 ? void 0 : _f.html_url;
+        const prTitle = (_g = payload.pull_request) === null || _g === void 0 ? void 0 : _g.title;
         const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prTitle} ${prUrl} by ${requestUsername}.`;
         const { apiToken } = allInputs;
         const exist = await chatwork_1.ChatworkRepositoryImpl.existChatworkTask(apiToken, roomId, account.account_id, message);
