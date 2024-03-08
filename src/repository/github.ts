@@ -1,27 +1,29 @@
 import axios from "axios";
 import * as core from "@actions/core";
 
-type GithubGetReviewerResult = {
+type GithubGetPR = {
   users: GithubGetReviewerNameResult[];
+  title: string;
+  html_url: string;
 };
 
 type GithubGetReviewerNameResult = {
   login: string;
 };
 
-export const latestReviewer = async (
+export const getPR = async (
   repoName: string,
   prNumber: number,
   repoToken: string,
-): Promise<string[] | null> => {
+): Promise<GithubGetPR | null> => {
   core.info(`repoName:${repoName} prNumber: ${prNumber}`);
-  const result = await axios.get<GithubGetReviewerResult>(
-    `https://api.github.com/repos/${repoName}/pulls/${prNumber}/requested_reviewers`,
+  const result = await axios.get<GithubGetPR>(
+    `https://api.github.com/repos/${repoName}/pulls/${prNumber}`,
     {
       headers: { authorization: `Bearer ${repoToken}` },
     },
   );
   if (result.data.users.length == 0) return null;
 
-  return result.data.users.map((user) => user.login);
+  return result.data;
 };

@@ -2,7 +2,7 @@ import { WebhookPayload } from "@actions/github/lib/interfaces";
 import * as core from "@actions/core";
 import { context } from "@actions/github";
 import { ChatworkRepositoryImpl } from "./repository/chatwork";
-import { latestReviewer } from "./repository/github";
+import { getPR } from "./repository/github";
 import { isUrl, MappingConfigRepositoryImpl } from "./repository/mappingConfig";
 import { AllInputs, convertToChatworkUsername, MappingFile } from "./model";
 import {
@@ -28,27 +28,27 @@ export const execPrReviewRequestedMention = async (
 ): Promise<void> => {
   core.info("start execPrReviewRequestedMention()");
 
-  const name = payload.repository?.full_name;
-  if (name === undefined) {
+  const repo_name = payload.repository?.full_name;
+  if (repo_name === undefined) {
     throw new Error("Can not find repository name.");
   }
 
-  const number = payload.pull_request?.number || Number(payload.inputs?.pr_number);
-  if (number === undefined) {
+  const pr_number = payload.pull_request?.number || Number(payload.inputs?.pr_number);
+  if (pr_number === undefined) {
     throw new Error("Can not find pull request number.");
   }
 
-  const reviewers = await latestReviewer(name, number, allInputs.repoToken);
-  if (reviewers === null || reviewers.length == 0) {
+  const pr = await getPR(repo_name, pr_number, allInputs.repoToken);
+  if (pr === null) {
     throw new Error("Can not find review requested user.");
   }
+
+  const reviewers = pr.users.map((user) => user.login)
   core.info(`reviewers ${reviewers}`);
 
   const slackIds = convertToChatworkUsername(reviewers, mapping);
   if (slackIds.length === 0) {
-    core.info(
-      "finish execPrReviewRequestedMention because slackIds.length === 0",
-    );
+    core.info("finish execPrReviewRequestedMention slackIds.length === 0");
     return;
   }
 
@@ -59,8 +59,8 @@ export const execPrReviewRequestedMention = async (
     }
 
     const requestUsername = payload.sender?.login;
-    const prUrl = payload.pull_request?.html_url;
-    const prTitle = payload.pull_request?.title;
+    const prUrl = pr?.html_url;
+    const prTitle = pr?.title;
 
     const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prTitle} ${prUrl} by ${requestUsername}.`;
     const { apiToken } = allInputs;

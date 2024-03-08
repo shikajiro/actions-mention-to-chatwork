@@ -15907,24 +15907,25 @@ const github_3 = __webpack_require__(427);
  * レビュー依頼があった際にタスクを作成する
  */
 const execPrReviewRequestedMention = async (payload, allInputs, mapping) => {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d;
     core.info("start execPrReviewRequestedMention()");
-    const name = (_a = payload.repository) === null || _a === void 0 ? void 0 : _a.full_name;
-    if (name === undefined) {
+    const repo_name = (_a = payload.repository) === null || _a === void 0 ? void 0 : _a.full_name;
+    if (repo_name === undefined) {
         throw new Error("Can not find repository name.");
     }
-    const number = ((_b = payload.pull_request) === null || _b === void 0 ? void 0 : _b.number) || Number((_c = payload.inputs) === null || _c === void 0 ? void 0 : _c.pr_number);
-    if (number === undefined) {
+    const pr_number = ((_b = payload.pull_request) === null || _b === void 0 ? void 0 : _b.number) || Number((_c = payload.inputs) === null || _c === void 0 ? void 0 : _c.pr_number);
+    if (pr_number === undefined) {
         throw new Error("Can not find pull request number.");
     }
-    const reviewers = await (0, github_2.latestReviewer)(name, number, allInputs.repoToken);
-    if (reviewers === null || reviewers.length == 0) {
+    const pr = await (0, github_2.getPR)(repo_name, pr_number, allInputs.repoToken);
+    if (pr === null) {
         throw new Error("Can not find review requested user.");
     }
+    const reviewers = pr.users.map((user) => user.login);
     core.info(`reviewers ${reviewers}`);
     const slackIds = (0, model_1.convertToChatworkUsername)(reviewers, mapping);
     if (slackIds.length === 0) {
-        core.info("finish execPrReviewRequestedMention because slackIds.length === 0");
+        core.info("finish execPrReviewRequestedMention slackIds.length === 0");
         return;
     }
     for (const account of slackIds) {
@@ -15933,8 +15934,8 @@ const execPrReviewRequestedMention = async (payload, allInputs, mapping) => {
             throw new Error("Can not find room ID.");
         }
         const requestUsername = (_d = payload.sender) === null || _d === void 0 ? void 0 : _d.login;
-        const prUrl = (_e = payload.pull_request) === null || _e === void 0 ? void 0 : _e.html_url;
-        const prTitle = (_f = payload.pull_request) === null || _f === void 0 ? void 0 : _f.title;
+        const prUrl = pr === null || pr === void 0 ? void 0 : pr.html_url;
+        const prTitle = pr === null || pr === void 0 ? void 0 : pr.title;
         const message = `[To:${account.account_id}] (bow) has been requested to review PR:${prTitle} ${prUrl} by ${requestUsername}.`;
         const { apiToken } = allInputs;
         const exist = await chatwork_1.ChatworkRepositoryImpl.existChatworkTask(apiToken, roomId, account.account_id, message);
@@ -19744,19 +19745,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.latestReviewer = void 0;
+exports.getPR = void 0;
 const axios_1 = __importDefault(__webpack_require__(53));
 const core = __importStar(__webpack_require__(470));
-const latestReviewer = async (repoName, prNumber, repoToken) => {
+const getPR = async (repoName, prNumber, repoToken) => {
     core.info(`repoName:${repoName} prNumber: ${prNumber}`);
-    const result = await axios_1.default.get(`https://api.github.com/repos/${repoName}/pulls/${prNumber}/requested_reviewers`, {
+    const result = await axios_1.default.get(`https://api.github.com/repos/${repoName}/pulls/${prNumber}`, {
         headers: { authorization: `Bearer ${repoToken}` },
     });
     if (result.data.users.length == 0)
         return null;
-    return result.data.users.map((user) => user.login);
+    return result.data;
 };
-exports.latestReviewer = latestReviewer;
+exports.getPR = getPR;
 
 
 /***/ }),
