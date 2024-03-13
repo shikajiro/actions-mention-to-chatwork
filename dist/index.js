@@ -19753,8 +19753,6 @@ const getPR = async (repoName, prNumber, repoToken) => {
     const result = await axios_1.default.get(`https://api.github.com/repos/${repoName}/pulls/${prNumber}`, {
         headers: { authorization: `Bearer ${repoToken}` },
     });
-    if (result.data.users.length == 0)
-        return null;
     return result.data;
 };
 exports.getPR = getPR;
