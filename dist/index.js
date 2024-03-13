@@ -15921,7 +15921,7 @@ const execPrReviewRequestedMention = async (payload, allInputs, mapping) => {
     if (pr === null) {
         throw new Error("Can not find review requested user.");
     }
-    const reviewers = pr.users.map((user) => user.login);
+    const reviewers = pr.requested_reviewers.map((user) => user.login);
     core.info(`reviewers ${reviewers}`);
     const slackIds = (0, model_1.convertToChatworkUsername)(reviewers, mapping);
     if (slackIds.length === 0) {
@@ -19753,6 +19753,8 @@ const getPR = async (repoName, prNumber, repoToken) => {
     const result = await axios_1.default.get(`https://api.github.com/repos/${repoName}/pulls/${prNumber}`, {
         headers: { authorization: `Bearer ${repoToken}` },
     });
+    if (result.data.requested_reviewers.length == 0)
+        return null;
     return result.data;
 };
 exports.getPR = getPR;
