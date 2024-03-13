@@ -23,7 +23,5 @@ export const getPR = async (
       headers: { authorization: `Bearer ${repoToken}` },
     },
   );
-  if (result.data.users.length == 0) return null;
-
   return result.data;
 };
