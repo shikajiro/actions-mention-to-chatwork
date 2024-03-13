@@ -2,7 +2,7 @@ import axios from "axios";
 import * as core from "@actions/core";
 
 type GithubGetPR = {
-  users: GithubGetReviewerNameResult[];
+  requested_reviewers: GithubGetReviewerNameResult[];
   title: string;
   html_url: string;
 };
@@ -23,5 +23,7 @@ export const getPR = async (
       headers: { authorization: `Bearer ${repoToken}` },
     },
   );
+  if (result.data.requested_reviewers.length == 0) return null;
+
   return result.data;
 };

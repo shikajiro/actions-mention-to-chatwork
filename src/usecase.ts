@@ -43,7 +43,7 @@ export const execPrReviewRequestedMention = async (
     throw new Error("Can not find review requested user.");
   }
 
-  const reviewers = pr.users.map((user) => user.login)
+  const reviewers = pr.requested_reviewers.map((user) => user.login)
   core.info(`reviewers ${reviewers}`);
 
   const slackIds = convertToChatworkUsername(reviewers, mapping);
